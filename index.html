@@ -539,25 +539,29 @@ let time = 0;
 function animateParallax() {
   time += 0.015;
 
-  currentRotX += (targetRotX - currentRotX) * 0.08;
-  currentRotY += (targetRotY - currentRotY) * 0.08;
+  // Smooth mouse easing
+  currentRotX += (targetRotX - currentRotX) * 0.06;
+  currentRotY += (targetRotY - currentRotY) * 0.06;
 
-  const waveX = Math.sin(time) * 4.5;
-  const waveY = Math.cos(time * 0.7) * 4.5;
+  // CRT magic carpet waves
+  const waveX = Math.sin(time) * 3.5;
+  const waveY = Math.cos(time * 0.7) * 3.5;
 
-  const bendX = Math.sin(time * 0.4) * 1.8;
-  const bendY = Math.cos(time * 0.5) * 1.8;
+  const bendZ = Math.sin(time * 0.5) * 1.2;
 
+  // FINAL combined transform
   screenEl.style.transform = `
+    perspective(1400px)
     rotateX(${currentRotX + waveY}deg)
     rotateY(${currentRotY + waveX}deg)
-    rotateZ(${bendX}deg)
+    rotateZ(${bendZ}deg)
     scaleX(1.08)
     scaleY(0.94)
   `;
 
   requestAnimationFrame(animateParallax);
 }
+
 
 
 // -------- START --------
