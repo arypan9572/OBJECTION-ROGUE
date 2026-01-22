@@ -211,14 +211,112 @@ footer{text-align:center;font-size:8px;opacity:0.7}
   100% { transform: scale(1.01); }
 }
 
+/* ===============================
+   PIXEL JUDGE
+================================ */
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.judge{
+  position:relative;
+  width:48px;
+  height:64px;
+  image-rendering: pixelated;
+}
+
+/* HEAD */
+.judge .head{
+  position:absolute;
+  top:0;
+  left:12px;
+  width:24px;
+  height:16px;
+  background:#f2c9a0;
+  box-shadow:
+    inset -2px -2px #caa07a;
+}
+
+/* BODY / ROBE */
+.judge .body{
+  position:absolute;
+  top:16px;
+  left:6px;
+  width:36px;
+  height:36px;
+  background:#222;
+  box-shadow:
+    inset -3px -3px #000;
+}
+
+/* GAVEL */
+.judge .gavel{
+  position:absolute;
+  bottom:0;
+  right:-8px;
+  width:14px;
+  height:6px;
+  background:#8b5a2b;
+  box-shadow:
+    0 6px #5a3a1a;
+}
+
+/* ===============================
+   ANIMATIONS
+================================ */
+
+@keyframes judgeIdle {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(1px); }
+}
+
+@keyframes judgeApprove {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes judgeAngry {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+.judge.idle{
+  animation: judgeIdle 1.6s infinite steps(2);
+}
+
+.judge.good{
+  animation: judgeApprove 0.4s steps(2);
+}
+
+.judge.bad{
+  animation: judgeAngry 0.4s steps(2);
+}
+
+
 </style>
 </head>
 <body>
 <div id="crt"><div id="screen-wrap">   <div id="screen"><div id="game">
-<header>
-  <h1>OBJECTION ROGUE</h1>
-  <div id="stats"></div>
+<header class="topbar">
+  <div class="title">
+    <h1>OBJECTION ROGUE</h1>
+    <div id="stats"></div>
+  </div>
+
+  <div id="judge" class="judge idle">
+    <div class="head"></div>
+    <div class="body"></div>
+    <div class="gavel"></div>
+  </div>
 </header>
+
 <div id="court" class="panel"></div>
 <div class="panel"><div class="buttons" id="actions"></div></div>
 <div class="panel log" id="log"></div>
@@ -410,6 +508,9 @@ function nextCase() {
 }
 
 function object(type){
+  const judge = document.getElementById('judge');
+judge.className = 'judge';
+
   if(type) objections--;
 
   let explanation = '';
@@ -420,11 +521,18 @@ function object(type){
     explanation = getExplanation(current.c, true, current.text);
     logMsg(`CORRECT OBJECTION: ${type}\n${explanation}`, 'good');
 
+      judge.classList.add('good');
+  setTimeout(() => judge.classList.add('idle'), 400);
+
   } else if(type === null){ // player clicked No Objection
     if(current.c === null){ // actually no objection needed
       streak++;
       credibility += 5;
       logMsg(`CORRECT: No Objection needed! ✅`, 'good');
+
+          judge.classList.add('good');
+    setTimeout(() => judge.classList.add('idle'), 400);
+
     } else { // they missed a real objection
       credibility -= 10;
       streak = 0;
@@ -437,6 +545,10 @@ function object(type){
     streak = 0;
     explanation = getExplanation(current.c, false, current.text); // <-- use current.c, not the one they clicked
     logMsg(`WRONG OBJECTION (${type})\nCorrect was: ${current.c}\n${explanation}`, 'bad');
+
+      judge.classList.add('bad');
+  setTimeout(() => judge.classList.add('idle'), 400);
+
   }
 
   if(credibility <= 0 || objections <= 0){
