@@ -123,6 +123,7 @@ footer{text-align:center;font-size:8px;opacity:0.7}
   transition: all 0.8s ease;
 }
 
+
 </style>
 </head>
 <body>
@@ -185,6 +186,9 @@ let phase = 'CROSS';
 let objections = 5;
 let credibility = 100;
 let streak = 0;
+// Colors to cycle through
+const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
+let currentColorIndex = 0;
 let witness = {};
 let current = {};
 
@@ -288,6 +292,15 @@ function endRun(){
     streak=0;
     log.innerHTML='';
     nextCase();
+    setTimeout(()=>{
+  // Cycle the color
+  currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
+  const newColor = COLOR_PALETTE[currentColorIndex];
+
+  // Apply new color to everything green
+  updateGreenThings(newColor);
+}, 50);
+
   },3000);
 }
 
@@ -374,6 +387,20 @@ function cycleColor(){
 
 // Automatically cycle every 2 seconds
 setInterval(cycleColor, 2000);
+function updateGreenThings(newColor){
+  // Panels, headers, buttons, sprites
+  document.querySelectorAll('.panel, header, .btn, .btn.objection, .sprite').forEach(el => {
+    const styles = getComputedStyle(el);
+
+    // Check if the element is “green” now
+    if(styles.borderColor === 'rgb(0, 255, 136)') el.style.borderColor = newColor;
+    if(styles.backgroundColor === 'rgb(0, 255, 136)') el.style.backgroundColor = newColor;
+    if(styles.color === 'rgb(0, 255, 136)') el.style.color = newColor;
+  });
+
+  // Log “good” text (green)
+  document.querySelectorAll('.good').forEach(el => el.style.color = newColor);
+}
 
 // -------- START --------
 nextCase();
