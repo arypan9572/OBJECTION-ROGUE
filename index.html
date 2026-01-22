@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OBJECTION ROGUE // 8-BIT COURT</title>
+<title>OBJECTION ROGUE</title>
 
 <!-- 8-bit font -->
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -119,11 +119,6 @@ header h1{margin:0 0 10px 0;font-size:18px;color:var(--green)}
 .bad{color:var(--red)}
 .info{color:var(--yellow)}
 footer{text-align:center;font-size:8px;opacity:0.7}
-.btn, .btn.objection, .panel, header, .sprite, header h1, .good {
-  transition: all 0.8s ease;
-}
-
-
 </style>
 </head>
 <body>
@@ -186,9 +181,6 @@ let phase = 'CROSS';
 let objections = 5;
 let credibility = 100;
 let streak = 0;
-// Colors to cycle through
-const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
-let currentColorIndex = 0;
 let witness = {};
 let current = {};
 
@@ -283,7 +275,7 @@ function endRun(){
   actions.innerHTML='';
   logMsg('RUN OVER — RESETTING', 'bad');
 
-setTimeout(()=>{
+  setTimeout(()=>{
     run++;
     caseNum=1;
     phase='CROSS';
@@ -292,16 +284,7 @@ setTimeout(()=>{
     streak=0;
     log.innerHTML='';
     nextCase();
-
-    // After a tiny delay, update green things
-    setTimeout(()=>{
-        currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
-        const newColor = COLOR_PALETTE[currentColorIndex];
-        updateGreenThings(newColor);
-        logMsg('CASE COMPLETE! GREEN THINGS UPDATED!', 'info');
-    }, 100);
-}, 3000);
-
+  },3000);
 }
 
 function updateStats(){
@@ -356,64 +339,8 @@ function animateParallax() {
 animateParallax();
 
 
-
-function applyDynamicColor(color){
-  // Panels, header, buttons, sprites — borders and backgrounds
-  document.querySelectorAll('.panel, header, .btn, .sprite').forEach(el => {
-    const styles = getComputedStyle(el);
-    // Only change green borders
-    if(styles.borderColor === 'rgb(0, 255, 136)') el.style.borderColor = color;
-    // Only change green backgrounds
-    if(styles.backgroundColor === 'rgb(0, 255, 136)') el.style.backgroundColor = color;
-  });
-
-  // Objection buttons background
-  document.querySelectorAll('.btn.objection').forEach(el => {
-    el.style.backgroundColor = color;
-  });
-
-  // Text: header h1, sprite, .good in log
-  document.querySelectorAll('header h1, .sprite, .good').forEach(el => {
-    if(getComputedStyle(el).color === 'rgb(0, 255, 136)') el.style.color = color;
-  });
-}
-function cycleColor(){
-  currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
-  const newColor = COLOR_PALETTE[currentColorIndex];
-  applyDynamicColor(newColor);
-}
-
-
-function updateGreenThings(newColor){
-  // EVERYTHING WE WANT TO CHANGE — make a list of selectors
-  const elements = document.querySelectorAll(
-    'header, header h1, .panel, .btn, .btn.objection, .sprite, .good'
-  );
-
-  elements.forEach(el => {
-    // Borders
-    const border = getComputedStyle(el).borderColor;
-    if(border.includes('0, 255, 136')) el.style.borderColor = newColor;
-
-    // Backgrounds
-    const bg = getComputedStyle(el).backgroundColor;
-    if(bg.includes('0, 255, 136')) el.style.backgroundColor = newColor;
-
-    // Text colors
-    const color = getComputedStyle(el).color;
-    if(color.includes('0, 255, 136')) el.style.color = newColor;
-  });
-}
-
-
-  // Log “good” text (green)
-  document.querySelectorAll('.good').forEach(el => el.style.color = newColor);
-}
-
 // -------- START --------
 nextCase();
 </script>
 </body>
 </html>
-
-
