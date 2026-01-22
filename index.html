@@ -237,6 +237,9 @@ function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function getCorrectObjection(type, text) {
   const lower = text.toLowerCase();
 
+  // 20% chance the statement is fine — no objection
+  if(Math.random() < 0.2) return null; // <-- this makes No Objection correct
+
   if(type === "WITNESS") {
     if(lower.includes("heard") || lower.includes("saw")) return "Hearsay";
     if(lower.includes("guess") || lower.includes("thinks")) return "Speculation";
@@ -326,11 +329,18 @@ function object(type){
     explanation = getExplanation(type, true, current.text);
     logMsg(`CORRECT OBJECTION: ${type}\n${explanation}`, 'good');
   } else if(type===null){
+  if(current.c===null){
+    streak++;
+    credibility += 5;
+    logMsg(`CORRECT: No Objection needed! ✅`, 'good');
+  } else {
     credibility -= 10;
     streak = 0;
     explanation = getExplanation(current.c, false, current.text);
     logMsg(`MISSED OBJECTION. SHOULD HAVE BEEN ${current.c}\n${explanation}`, 'bad');
-  } else {
+  }
+}
+ else {
     credibility -= 15;
     streak = 0;
     explanation = getExplanation(type, false, current.text);
