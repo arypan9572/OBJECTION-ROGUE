@@ -359,10 +359,11 @@ function applyCaseColor(color){
 
   // All buttons — objection buttons background + border, NO OBJECTION text + border
 document.querySelectorAll('.btn').forEach(el => {
-    el.style.background = color;
-    el.style.borderColor = color;
-    el.style.color = '#000';
+    el.style.background = color;  // palette color
+    el.style.borderColor = color; // palette color
+    el.style.color = color;       // text same color
 });
+
 
  
 
