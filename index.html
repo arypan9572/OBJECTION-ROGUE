@@ -240,6 +240,30 @@ function formatText(text) {
 
 
 // -------- CORE LOOP --------
+
+function formatText(text) {
+  // If text starts with quotes or is clearly a quote, keep it
+  if(text.startsWith('"') || text.startsWith('“') || text.includes('says') || text.includes('states')) {
+    return text;
+  }
+  // Otherwise, wrap in quotes
+  return `“${text}”`;
+}
+  
+function getSpeakerLabel(type, text) {
+  if(type === 'WITNESS') {
+    // If text has normal sentence, say SAYS, else CLAIMS
+    const lower = text.toLowerCase();
+    if(lower.includes('i ') || lower.includes('you ') || lower.endsWith('.') || lower.endsWith('!') || lower.endsWith('?')) {
+      return 'SAYS';
+    } else {
+      return 'CLAIMS';
+    }
+  } else {
+    return 'ASKS'; // for lawyer questions
+  }
+}
+
 function nextCase(){
   witness = { trait: rand(WITNESS_TRAITS) };
   current = rand(PROMPTS);
@@ -254,8 +278,11 @@ function nextCase(){
     </div>
     <div class='label'>PHASE:</div> ${phase}<br>
     <div class='label'>WITNESS TRAIT:</div> ${witness.trait}<br><br>
-   <div class='label'>${speaker} SAYS:</div><br>
+  const speakerLabel = getSpeakerLabel(current.type, current.text);
+
+<div class='label'>${speakerLabel}:</div><br>
 ${formatText(current.text)}
+
 
   `;
 
@@ -279,39 +306,63 @@ ${formatText(current.text)}
 function object(type){
   if(type) objections--;
 
+  let explanation = '';
+
   if(type===current.c){
     streak++;
-    credibility+=5;
-    logMsg(`CORRECT OBJECTION: ${type}`, 'good');
+    credibility += 5;
+    explanation = getExplanation(type, true, current.text);
+    logMsg(`CORRECT OBJECTION: ${type}\n${explanation}`, 'good');
   } else if(type===null){
-    credibility-=10;
-    streak=0;
-    logMsg(`MISSED OBJECTION. SHOULD HAVE BEEN ${current.c}`, 'bad');
+    credibility -= 10;
+    streak = 0;
+    explanation = getExplanation(current.c, false, current.text);
+    logMsg(`MISSED OBJECTION. SHOULD HAVE BEEN ${current.c}\n${explanation}`, 'bad');
   } else {
-    credibility-=15;
-    streak=0;
-    logMsg(`WRONG OBJECTION (${type})`, 'bad');
+    credibility -= 15;
+    streak = 0;
+    explanation = getExplanation(type, false, current.text);
+    logMsg(`WRONG OBJECTION (${type})\n${explanation}`, 'bad');
   }
 
-  if(credibility<=0 || objections<=0){
+  if(credibility <= 0 || objections <= 0){
     endRun();
     return;
   }
 
   caseNum++;
 
-  if(caseNum%6===0){
+  if(caseNum % 6 === 0){
     objections++;
     logMsg('BONUS: +1 OBJECTION', 'info');
   }
 
-  if(caseNum%10===0){
+  if(caseNum % 10 === 0){
     phase = phase==='CROSS' ? 'REDIRECT' : 'CROSS';
     logMsg(`PHASE SHIFT: ${phase}`, 'info');
   }
 
   nextCase();
 }
+
+function getExplanation(objectionType, isCorrect, text) {
+  const reasons = {
+    'Hearsay': 'The witness is reporting something they heard from someone else, which is not allowed as evidence unless an exception applies.',
+    'Leading': 'The question suggests the answer instead of letting the witness answer freely.',
+    'Irrelevant': 'The testimony does not relate to the case at hand.',
+    'Speculation': 'The witness is guessing about someone’s thoughts or intent, which is not admissible.',
+    'Foundation': 'Evidence is being introduced without establishing its authenticity or relevance first.',
+    'Argumentative': 'The lawyer is arguing or challenging the witness instead of asking a proper question.',
+    'Compound': 'The question asks multiple things at once, making it confusing or unfair.'
+  };
+
+  const resultText = isCorrect ? 
+    `✅ This objection is correct because: ${reasons[objectionType]}` : 
+    `❌ This objection is incorrect. Reason: ${reasons[objectionType] || 'Not applicable here.'}`;
+
+  return resultText;
+}
+
 
 function endRun(){
   court.innerHTML = `
