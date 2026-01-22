@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBJECTION ROGUE // 8-BIT COURT</title>
+
+<!-- 8-bit font -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#020403;
+  --panel:#041b0f;
+  --panel-dark:#02140a;
+  --green:#00ff88;
+  --green-dim:#00aa5a;
+  --red:#ff4444;
+  --yellow:#ffee55;
+  --text:#b6ffd9;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#000;
+  font-family:'Press Start 2P', monospace;
+  overflow:hidden;
+}
+#crt{
+  min-height:100vh;
+  padding:22px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+/* CRT curvature + blur */
+#screen{
+  width:100%;
+  max-width:980px;
+  background:radial-gradient(circle at center, #044 0%, var(--bg) 70%);
+  color:var(--text);
+  border-radius:18px;
+  padding:22px;
+  transform:perspective(900px) rotateX(2deg) rotateY(-2deg);
+  box-shadow:
+    0 0 60px rgba(0,255,136,0.25),
+    inset 0 0 80px rgba(0,0,0,0.8);
+  filter:blur(0.4px) contrast(1.15) saturate(1.2);
+}
+/* vignette */
+#screen::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  box-shadow:inset 0 0 120px rgba(0,0,0,0.85);
+  pointer-events:none;
+}
+/* scanlines */
+#screen::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.25) 1px,
+    rgba(0,0,0,0) 3px,
+    rgba(0,0,0,0) 5px
+  );
+  pointer-events:none;
+}
+#game{position:relative}
+header{
+  border:4px solid var(--green);
+  padding:14px;
+  margin-bottom:14px;
+  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-dark) 100%);
+}
+header h1{margin:0 0 10px 0;font-size:18px;color:var(--green)}
+#stats{font-size:10px;line-height:1.6}
+.panel{
+  border:4px solid var(--green);
+  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-dark) 100%);
+  padding:14px;
+  margin-bottom:14px;
+}
+#court{min-height:200px;font-size:11px;line-height:1.8}
+.label{color:var(--yellow)}
+.courtroom{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:10px;
+}
+.sprite{
+  border:3px solid var(--green-dim);
+  padding:6px;
+  font-size:8px;
+  text-align:center;
+}
+.buttons{display:flex;flex-wrap:wrap;gap:10px}
+.btn{
+  font-family:'Press Start 2P', monospace;
+  font-size:9px;
+  padding:12px 14px;
+  background:var(--panel-dark);
+  color:var(--green);
+  border:4px solid var(--green);
+  cursor:pointer;
+  box-shadow:inset -4px -4px 0 rgba(0,0,0,0.6);
+}
+.btn:hover{background:#063b22}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn.objection{background:var(--green);color:#000}
+.log{font-size:9px;max-height:240px;overflow:auto}
+.log div{margin-bottom:6px}
+.good{color:var(--green)}
+.bad{color:var(--red)}
+.info{color:var(--yellow)}
+footer{text-align:center;font-size:8px;opacity:0.7}
+</style>
+</head>
+<body>
+<div id="crt"><div id="screen"><div id="game">
+<header>
+  <h1>OBJECTION ROGUE</h1>
+  <div id="stats"></div>
+</header>
+<div id="court" class="panel"></div>
+<div class="panel"><div class="buttons" id="actions"></div></div>
+<div class="panel log" id="log"></div>
+<footer>8-BIT CRT COURTROOM // INSPIRED BY OBJECTION! (1992)</footer>
+</div></div></div>
+
+<div class="panel log" id="log"></div>
+
+<footer>
+  8-BIT LEGAL ROGUELITE // INSPIRED BY OBJECTION! (1992)
+</footer>
+
+</div>
+</div>
+
+<script>
+/***********************************************************
+ * OBJECTION ROGUE — FULL 8-BIT ROGUELITE CORE
+ ***********************************************************/
+
+// -------- OBJECTION TYPES --------
+const OBJECTIONS = [
+  {name:'Hearsay', desc:'Out-of-court statement'},
+  {name:'Leading', desc:'Suggests answer'},
+  {name:'Irrelevant', desc:'Not related to case'},
+  {name:'Speculation', desc:'Guessing intent'},
+  {name:'Foundation', desc:'Evidence not established'},
+  {name:'Argumentative', desc:'Attorney arguing'},
+  {name:'Compound', desc:'Multiple questions at once'}
+];
+
+// -------- WITNESS TRAITS --------
+const WITNESS_TRAITS = [
+  'Nervous','Confident','Hostile','Forgetful','Expert','Deceptive'
+];
+
+// -------- CASE FRAGMENTS --------
+const PROMPTS = [
+  {type:'WITNESS', text:'states they heard the defendant confess earlier that night.', c:'Hearsay'},
+  {type:'WITNESS', text:'talks about an unrelated incident from years ago.', c:'Irrelevant'},
+  {type:'WITNESS', text:'guesses what the defendant was thinking.', c:'Speculation'},
+  {type:'LAWYER', text:'So you clearly saw the defendant commit the crime, right?', c:'Leading'},
+  {type:'LAWYER', text:'Isn\'t it true that you were angry AND intoxicated that night?', c:'Compound'},
+  {type:'LAWYER', text:'Why should the jury believe someone like you?', c:'Argumentative'},
+  {type:'LAWYER', text:'Can you explain this document that was never admitted?', c:'Foundation'}
+];
+
+// -------- GAME STATE --------
+let run = 1;
+let caseNum = 1;
+let phase = 'CROSS';
+let objections = 5;
+let credibility = 100;
+let streak = 0;
+let witness = {};
+let current = {};
+
+// -------- DOM --------
+const court = document.getElementById('court');
+const actions = document.getElementById('actions');
+const log = document.getElementById('log');
+const stats = document.getElementById('stats');
+
+// -------- UTIL --------
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// -------- CORE LOOP --------
+function nextCase(){
+  witness = { trait: rand(WITNESS_TRAITS) };
+  current = rand(PROMPTS);
+  const speaker = current.type==='WITNESS' ? 'WITNESS' : 'OPPOSING COUNSEL';
+
+  court.innerHTML = `
+    <div class='courtroom'>
+      <div class='sprite'>JUDGE</div>
+      <div class='sprite'>JURY</div>
+      <div class='sprite'>${speaker}</div>
+      <div class='sprite'>YOU</div>
+    </div>
+    <div class='label'>PHASE:</div> ${phase}<br>
+    <div class='label'>WITNESS TRAIT:</div> ${witness.trait}<br><br>
+    <div class='label'>${speaker} SAYS:</div><br>
+    “${current.text}”
+  `;
+
+  actions.innerHTML='';
+  OBJECTIONS.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='btn objection';
+    b.textContent=o.name.toUpperCase();
+    b.onclick=()=>object(o.name);
+    actions.appendChild(b);
+  });
+  const no=document.createElement('button');
+  no.className='btn';
+  no.textContent='NO OBJECTION';
+  no.onclick=()=>object(null);
+  actions.appendChild(no);
+
+  updateStats();
+}
+
+function object(type){
+  if(type) objections--;
+
+  if(type===current.c){
+    streak++;
+    credibility+=5;
+    logMsg(`CORRECT OBJECTION: ${type}`, 'good');
+  } else if(type===null){
+    credibility-=10;
+    streak=0;
+    logMsg(`MISSED OBJECTION. SHOULD HAVE BEEN ${current.c}`, 'bad');
+  } else {
+    credibility-=15;
+    streak=0;
+    logMsg(`WRONG OBJECTION (${type})`, 'bad');
+  }
+
+  if(credibility<=0 || objections<=0){
+    endRun();
+    return;
+  }
+
+  caseNum++;
+  
+  if(caseNum % 5 === 0) onCaseWin();
+
+  if(caseNum%6===0){
+    objections++;
+    logMsg('BONUS: +1 OBJECTION', 'info');
+  }
+
+  if(caseNum%10===0){
+    phase = phase==='CROSS' ? 'REDIRECT' : 'CROSS';
+    logMsg(`PHASE SHIFT: ${phase}`, 'info');
+  }
+
+  nextCase();
+}
+
+function endRun(){
+  court.innerHTML = `
+    <div class='label'>COURT ADJOURNED</div><br><br>
+    FINAL STREAK: ${streak}<br>
+    FINAL CREDIBILITY: ${credibility}
+  `;
+  actions.innerHTML='';
+  logMsg('RUN OVER — RESETTING', 'bad');
+
+  setTimeout(()=>{
+    run++;
+    caseNum=1;
+    phase='CROSS';
+    objections=5;
+    credibility=100;
+    streak=0;
+    log.innerHTML='';
+    nextCase();
+  },3000);
+}
+
+function updateStats(){
+  stats.innerHTML = `RUN ${run} | CASE ${caseNum}<br>OBJECTIONS ${objections} | CRED ${credibility} | STREAK ${streak}`;
+}
+
+function logMsg(m,c){
+  const d=document.createElement('div');
+  d.className=c;
+  d.textContent='> '+m;
+  log.prepend(d);
+}
+
+// -------- SMOOTH MOUSE PARALLAX (HEAVY EASING) --------
+const screenEl = document.getElementById('screen');
+
+// MUCH subtler tilt
+const maxTilt = 4; // was higher before
+
+let targetRotX = 0,
+    targetRotY = 0,
+    currentRotX = 0,
+    currentRotY = 0;
+
+// Heavy easing = very slow settling
+const easeFactor = 0.05; // lower = smoother & slower
+
+window.addEventListener('mousemove', (e) => {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  const xNorm = (e.clientX / w) * 2 - 1;
+  const yNorm = (e.clientY / h) * 2 - 1;
+
+  targetRotY = xNorm * maxTilt;
+  targetRotX = -yNorm * maxTilt;
+});
+
+function animateParallax() {
+  currentRotX += (targetRotX - currentRotX) * easeFactor;
+  currentRotY += (targetRotY - currentRotY) * easeFactor;
+
+  screenEl.style.transform = `
+    perspective(900px)
+    rotateX(${currentRotX.toFixed(3)}deg)
+    rotateY(${currentRotY.toFixed(3)}deg)
+  `;
+
+  requestAnimationFrame(animateParallax);
+}
+
+animateParallax();
+
+/*********** UNIVERSAL COLOR CYCLE ***********/
+const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
+let currentColorIndex = 0;
+
+function applyCaseColor(color){
+  // Header h1 and stats
+  document.querySelector('header h1').style.color = color;
+  stats.style.color = color;
+
+  // All panels outlines
+  document.querySelectorAll('header, .panel').forEach(el => el.style.borderColor = color);
+
+  // All buttons — objection buttons background + border, NO OBJECTION text + border
+  document.querySelectorAll('.btn').forEach(el => {
+    el.style.borderColor = color;
+    if(el.classList.contains('objection')){
+      el.style.background = color; // Objection button background
+      el.style.color = '#000';     // Text stays black
+    } else {
+      el.style.background = '#02140a'; // dark background
+      el.style.color = color;          // text changes
+    }
+  });
+
+  // Sprites — border + text
+  document.querySelectorAll('.sprite').forEach(el => {
+    el.style.borderColor = color;
+    el.style.color = color;
+  });
+
+  // Labels — skip PHASE:, WITNESS TRAIT:, WITNESS SAYS:
+  document.querySelectorAll('.label').forEach(el => {
+    if(!['PHASE:','WITNESS TRAIT:','WITNESS SAYS:'].includes(el.textContent)){
+      el.style.color = color;
+    }
+  });
+
+  // Courtroom text — everything inside court except the label exclusions
+  Array.from(court.querySelectorAll('*')).forEach(el=>{
+    if(!el.classList.contains('label')){
+      el.style.color = color;
+    }
+  });
+
+  // Log panel — only change boxes, not the text inside GOOD/BAD/INFO
+  document.querySelectorAll('.log div').forEach(el => {
+    if(!el.classList.contains('good') && !el.classList.contains('bad') && !el.classList.contains('info')){
+      el.style.color = color;
+    }
+  });
+}
+
+// Animate color transition
+function animateColorTransition(from, to, duration=800){
+  const start = performance.now();
+  function tick(now){
+    let t = (now-start)/duration;
+    if(t>1) t=1;
+    const color = lerpColor(from, to, t);
+    applyCaseColor(color);
+    if(t<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Helper: linear color interpolation
+function lerpColor(a, b, t){
+  const c1 = a.match(/\d+/g).map(Number);
+  const c2 = b.match(/\d+/g).map(Number);
+  const c = c1.map((v,i)=> Math.round(v + (c2[i]-v)*t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+// HEX to RGB
+function hexToRgb(hex){
+  const m = hex.match(/[0-9a-f]{2}/gi);
+  return `rgb(${parseInt(m[0],16)},${parseInt(m[1],16)},${parseInt(m[2],16)})`;
+}
+
+// Trigger color change at end of run
+const originalEndRun = endRun;
+endRun = function(){
+  originalEndRun();
+  setTimeout(()=>{
+    const oldColor = getComputedStyle(document.querySelector('header h1')).color;
+    currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
+    const newColor = hexToRgb(COLOR_PALETTE[currentColorIndex]);
+    animateColorTransition(oldColor, newColor, 800);
+    logMsg('CASE COMPLETE! COLORS UPDATED!', 'info');
+  }, 100);
+};
+
+
+
+// -------- START --------
+
+nextCase();
+</script>
+</body>
+</html>
+
+
