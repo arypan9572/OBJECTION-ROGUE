@@ -41,7 +41,8 @@ body{
   color:var(--text);
   border-radius:18px;
   padding:22px;
-  transform:perspective(900px) rotateX(2deg) rotateY(-2deg);
+  transform-style: preserve-3d;
+  will-change: transform, filter;
   box-shadow:
     0 0 60px rgba(0,255,136,0.25),
     inset 0 0 80px rgba(0,0,0,0.8);
@@ -70,6 +71,29 @@ body{
   );
   pointer-events:none;
 }
+
+/* CRT MAGIC CARPET BEND */
+#screen::marker { display:none; }
+
+#screen::before,
+#screen::after {
+  transform-origin: center;
+}
+
+#screen {
+  position: relative;
+}
+
+/* horizontal curve */
+#screen::after {
+  transform: scaleX(1.03) scaleY(0.98);
+}
+
+/* vertical curve */
+#screen::before {
+  transform: scaleY(1.03) scaleX(0.98);
+}
+
 #game{position:relative}
 header{
   border:4px solid var(--green);
@@ -449,18 +473,28 @@ window.addEventListener('mousemove', (e) => {
   targetRotX = -yNorm * maxTilt;
 });
 
+let time = 0;
+
 function animateParallax() {
+  time += 0.01;
+
   currentRotX += (targetRotX - currentRotX) * easeFactor;
   currentRotY += (targetRotY - currentRotY) * easeFactor;
 
+  const waveX = Math.sin(time) * 1.2;
+  const waveY = Math.cos(time * 0.8) * 1.2;
+
   screenEl.style.transform = `
     perspective(900px)
-    rotateX(${currentRotX.toFixed(3)}deg)
-    rotateY(${currentRotY.toFixed(3)}deg)
+    rotateX(${(currentRotX + waveY).toFixed(3)}deg)
+    rotateY(${(currentRotY + waveX).toFixed(3)}deg)
+    scaleX(1.02)
+    scaleY(0.98)
   `;
 
   requestAnimationFrame(animateParallax);
 }
+
 
 animateParallax();
 
