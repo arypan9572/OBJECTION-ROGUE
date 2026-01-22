@@ -232,12 +232,45 @@ footer{text-align:center;font-size:8px;opacity:0.7}
 .judge .head{
   position:absolute;
   top:0;
-  left:12px;
-  width:24px;
+  left:8px;
+  width:32px;
   height:16px;
-  background:#f2c9a0;
+  background:#0f3; /* dark green base */
   box-shadow:
-    inset -2px -2px #caa07a;
+    inset -2px -2px #0a2, /* darker shading */
+    inset 2px 2px #3f3;   /* lighter shading */
+  border:1px solid #0a2;
+}
+
+/* EYES */
+.judge .head .eye{
+  position:absolute;
+  top:4px;
+  width:4px;
+  height:4px;
+  background:#030; /* darkest green for eyes */
+}
+.judge .head .eye.left{ left:6px; }
+.judge .head .eye.right{ right:6px; }
+
+/* NOSE */
+.judge .head .nose{
+  position:absolute;
+  top:8px;
+  left:14px;
+  width:4px;
+  height:2px;
+  background:#060;
+}
+
+/* MOUTH */
+.judge .head .mouth{
+  position:absolute;
+  bottom:2px;
+  left:10px;
+  width:12px;
+  height:2px;
+  background:#060;
 }
 
 /* BODY / ROBE */
@@ -247,9 +280,10 @@ footer{text-align:center;font-size:8px;opacity:0.7}
   left:6px;
   width:36px;
   height:36px;
-  background:#222;
+  background:#093; /* robe main color */
   box-shadow:
-    inset -3px -3px #000;
+    inset -3px -3px #030,
+    inset 2px 2px #0f3;
 }
 
 /* GAVEL */
@@ -259,15 +293,14 @@ footer{text-align:center;font-size:8px;opacity:0.7}
   right:-8px;
   width:14px;
   height:6px;
-  background:#8b5a2b;
+  background:#0a3;
   box-shadow:
-    0 6px #5a3a1a;
+    0 6px #060;
 }
 
 /* ===============================
-   ANIMATIONS
+   ANIMATIONS (reuse existing)
 ================================ */
-
 @keyframes judgeIdle {
   0%,100% { transform: translateY(0); }
   50% { transform: translateY(1px); }
@@ -300,6 +333,7 @@ footer{text-align:center;font-size:8px;opacity:0.7}
 }
 
 
+
 </style>
 </head>
 <body>
@@ -310,11 +344,17 @@ footer{text-align:center;font-size:8px;opacity:0.7}
     <div id="stats"></div>
   </div>
 
-  <div id="judge" class="judge idle">
-    <div class="head"></div>
-    <div class="body"></div>
-    <div class="gavel"></div>
+<div id="judge" class="judge idle">
+  <div class="head">
+    <div class="eye left"></div>
+    <div class="eye right"></div>
+    <div class="mouth"></div>
+    <div class="nose"></div>
   </div>
+  <div class="body"></div>
+  <div class="gavel"></div>
+</div>
+
 </header>
 
 <div id="court" class="panel"></div>
