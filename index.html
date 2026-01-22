@@ -163,16 +163,54 @@ const WITNESS_TRAITS = [
   'Nervous','Confident','Hostile','Forgetful','Expert','Deceptive'
 ];
 
-// -------- CASE FRAGMENTS --------
-const PROMPTS = [
-  {type:'WITNESS', text:'states they heard the defendant confess earlier that night.', c:'Hearsay'},
-  {type:'WITNESS', text:'talks about an unrelated incident from years ago.', c:'Irrelevant'},
-  {type:'WITNESS', text:'guesses what the defendant was thinking.', c:'Speculation'},
-  {type:'LAWYER', text:'So you clearly saw the defendant commit the crime, right?', c:'Leading'},
-  {type:'LAWYER', text:'Isn\'t it true that you were angry AND intoxicated that night?', c:'Compound'},
-  {type:'LAWYER', text:'Why should the jury believe someone like you?', c:'Argumentative'},
-  {type:'LAWYER', text:'Can you explain this document that was never admitted?', c:'Foundation'}
+// Templates for generating lots of prompts
+const WITNESS_TEMPLATES = [
+  "says they saw the defendant %ACTION%",
+  "claims they were %ADJ% when they witnessed the event",
+  "mentions %EVENT% happened that night",
+  "guesses the defendant was %EMOTION%",
+  "talks about %EVENT% that may or may not be related"
 ];
+
+const LAWYER_TEMPLATES = [
+  "Did you see the defendant %ACTION%?",
+  "Isn't it true that you were %ADJ% that evening?",
+  "Explain why you %VERB% the document",
+  "How can you say you %VERB% without proof?",
+  "Would you admit you %VERB% at the time?"
+];
+
+const ACTIONS = ["running away", "holding a knife", "yelling", "entering the room", "breaking the window"];
+const ADJECTIVES = ["angry", "nervous", "intoxicated", "sleepy", "distracted"];
+const EVENTS = ["a fight", "a theft", "an argument", "a car crash", "a mysterious noise"];
+const EMOTIONS = ["scared", "happy", "confused", "angry"];
+const VERBS = ["signed", "ignored", "took", "destroyed", "altered"];
+
+const PROMPTS = [];
+
+// Generate 500+ witness prompts
+for(let i=0; i<500; i++){
+  const template = rand(WITNESS_TEMPLATES);
+  const text = template
+    .replace("%ACTION%", rand(ACTIONS))
+    .replace("%ADJ%", rand(ADJECTIVES))
+    .replace("%EVENT%", rand(EVENTS))
+    .replace("%EMOTION%", rand(EMOTIONS));
+  const objection = rand(OBJECTIONS).name;
+  PROMPTS.push({type:"WITNESS", text, c:objection});
+}
+
+// Generate 500+ lawyer prompts
+for(let i=0; i<500; i++){
+  const template = rand(LAWYER_TEMPLATES);
+  const text = template
+    .replace("%ACTION%", rand(ACTIONS))
+    .replace("%ADJ%", rand(ADJECTIVES))
+    .replace("%VERB%", rand(VERBS));
+  const objection = rand(OBJECTIONS).name;
+  PROMPTS.push({type:"LAWYER", text, c:objection});
+}
+
 
 // -------- GAME STATE --------
 let run = 1;
