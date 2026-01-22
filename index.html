@@ -283,7 +283,7 @@ function endRun(){
   actions.innerHTML='';
   logMsg('RUN OVER — RESETTING', 'bad');
 
-  setTimeout(()=>{
+setTimeout(()=>{
     run++;
     caseNum=1;
     phase='CROSS';
@@ -292,16 +292,16 @@ function endRun(){
     streak=0;
     log.innerHTML='';
     nextCase();
+
+    // After a tiny delay, update green things
     setTimeout(()=>{
-  // Cycle the color
-  currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
-  const newColor = COLOR_PALETTE[currentColorIndex];
+        currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
+        const newColor = COLOR_PALETTE[currentColorIndex];
+        updateGreenThings(newColor);
+        logMsg('CASE COMPLETE! GREEN THINGS UPDATED!', 'info');
+    }, 100);
+}, 3000);
 
-  // Apply new color to everything green
-  updateGreenThings(newColor);
-}, 50);
-
-  },3000);
 }
 
 function updateStats(){
@@ -355,9 +355,7 @@ function animateParallax() {
 
 animateParallax();
 
-// -------- DYNAMIC GREEN COLOR --------
-const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
-let currentColorIndex = 0;
+
 
 function applyDynamicColor(color){
   // Panels, header, buttons, sprites — borders and backgrounds
@@ -388,15 +386,26 @@ function cycleColor(){
 // Automatically cycle every 2 seconds
 setInterval(cycleColor, 2000);
 function updateGreenThings(newColor){
-  // Panels, headers, buttons, sprites
-  document.querySelectorAll('.panel, header, .btn, .btn.objection, .sprite').forEach(el => {
-    const styles = getComputedStyle(el);
+  // EVERYTHING WE WANT TO CHANGE — make a list of selectors
+  const elements = document.querySelectorAll(
+    'header, header h1, .panel, .btn, .btn.objection, .sprite, .good'
+  );
 
-    // Check if the element is “green” now
-    if(styles.borderColor === 'rgb(0, 255, 136)') el.style.borderColor = newColor;
-    if(styles.backgroundColor === 'rgb(0, 255, 136)') el.style.backgroundColor = newColor;
-    if(styles.color === 'rgb(0, 255, 136)') el.style.color = newColor;
+  elements.forEach(el => {
+    // Borders
+    const border = getComputedStyle(el).borderColor;
+    if(border.includes('0, 255, 136')) el.style.borderColor = newColor;
+
+    // Backgrounds
+    const bg = getComputedStyle(el).backgroundColor;
+    if(bg.includes('0, 255, 136')) el.style.backgroundColor = newColor;
+
+    // Text colors
+    const color = getComputedStyle(el).color;
+    if(color.includes('0, 255, 136')) el.style.color = newColor;
   });
+}
+
 
   // Log “good” text (green)
   document.querySelectorAll('.good').forEach(el => el.style.color = newColor);
