@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OBJECTION ROGUE // 8-BIT COURT</title>
+<title>OBJECTION ROGUE</title>
 
 <!-- 8-bit font -->
   
@@ -353,21 +353,24 @@ function applyCaseColor(color){
   document.querySelectorAll('header, .panel').forEach(el => el.style.borderColor = color);
 
   // All buttons — objection buttons background + border, NO OBJECTION text + border
-  document.querySelectorAll('.btn').forEach(el => {
+ document.querySelectorAll('.btn').forEach(el => {
     el.style.borderColor = color;
-   if(el.classList.contains('objection')){
-  el.style.background = color; // Objection button background
-  el.style.color = '#000';     // optional: you can switch to color for dynamic
-} else {
-      el.style.background = '#02140a'; // dark background
-      el.style.color = color;          // text changes
+
+    if(el.classList.contains('objection')){
+        el.style.background = color;  // Objection button background
+        el.style.color = '#000';      // black text
+    } else {
+        el.style.background = '#02140a'; // dark background stays
+        el.style.color = color;          // text follows color cycle
     }
-  });
+});
+ 
 
   // Sprites — border + text
   document.querySelectorAll('.sprite').forEach(el => {
     el.style.borderColor = color;
     el.style.color = color;
+    el.style.background = '#02140a'; // optional: keep dark box
   });
 
   // Labels — skip PHASE:, WITNESS TRAIT:, WITNESS SAYS:
