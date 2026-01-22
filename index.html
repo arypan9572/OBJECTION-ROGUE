@@ -232,12 +232,10 @@ const stats = document.getElementById('stats');
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 function formatText(text) {
-  // If the text contains 'I', 'you', or ends with punctuation like '.', '!', '?' 
-  // treat it like a spoken quote
-  if(/[Iyou]/i.test(text) || /[.!?]$/.test(text)) {
-    return `“${text}”`;
-  }
-  return text;
+  const lower = text.toLowerCase();
+  // Consider it a quote if it contains "i", "you", or ends with punctuation
+  const isQuote = lower.includes("i ") || lower.includes("you ") || lower.endsWith(".") || lower.endsWith("!") || lower.endsWith("?");
+  return isQuote ? `“${text}”` : text;
 }
 
 
