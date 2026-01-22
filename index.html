@@ -158,13 +158,20 @@ footer{text-align:center;font-size:8px;opacity:0.7}
 ================================ */
 
 #screen-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   perspective: 1400px;
+  overflow: hidden;
 }
+
 
 #screen {
   position: relative;
   transform-style: preserve-3d;
-  animation: crtBreath 6s ease-in-out infinite;
   filter: contrast(1.2) saturate(1.3);
 }
 
@@ -558,15 +565,14 @@ function animateParallax() {
   const waveX = Math.sin(time) * 3;
   const waveY = Math.cos(time * 0.8) * 3;
   const bendZ = Math.sin(time * 0.6) * 1.2;
+  const breath = 1 + Math.sin(time * 0.5) * 0.03;
 
   screenEl.style.transform = `
-    perspective(1600px)
     translateZ(${currentZ}px)
     rotateX(${currentRotX + waveY}deg)
     rotateY(${currentRotY + waveX}deg)
     rotateZ(${bendZ}deg)
-    scaleX(1.07)
-    scaleY(0.93)
+    scale(${breath * 1.07}, ${breath * 0.93})
   `;
 
   requestAnimationFrame(animateParallax);
@@ -576,6 +582,7 @@ function animateParallax() {
 
 // -------- START --------
 nextCase();
+animateParallax();
 </script>
 </body>
 </html>
