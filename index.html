@@ -231,12 +231,7 @@ const stats = document.getElementById('stats');
 // -------- UTIL --------
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-function formatText(text) {
-  const lower = text.toLowerCase();
-  // Consider it a quote if it contains "i", "you", or ends with punctuation
-  const isQuote = lower.includes("i ") || lower.includes("you ") || lower.endsWith(".") || lower.endsWith("!") || lower.endsWith("?");
-  return isQuote ? `“${text}”` : text;
-}
+
 
 
 // -------- CORE LOOP --------
@@ -264,10 +259,12 @@ function getSpeakerLabel(type, text) {
   }
 }
 
-function nextCase(){
+function nextCase() {
   witness = { trait: rand(WITNESS_TRAITS) };
   current = rand(PROMPTS);
   const speaker = current.type==='WITNESS' ? 'WITNESS' : 'OPPOSING COUNSEL';
+  const speakerLabel = getSpeakerLabel(current.type, current.text); // compute BEFORE template
+  const formattedText = formatText(current.text); // compute BEFORE template
 
   court.innerHTML = `
     <div class='courtroom'>
@@ -278,12 +275,8 @@ function nextCase(){
     </div>
     <div class='label'>PHASE:</div> ${phase}<br>
     <div class='label'>WITNESS TRAIT:</div> ${witness.trait}<br><br>
-  const speakerLabel = getSpeakerLabel(current.type, current.text);
-
-<div class='label'>${speakerLabel}:</div><br>
-${formatText(current.text)}
-
-
+    <div class='label'>${speakerLabel}:</div><br>
+    ${formattedText}
   `;
 
   actions.innerHTML='';
@@ -294,6 +287,7 @@ ${formatText(current.text)}
     b.onclick=()=>object(o.name);
     actions.appendChild(b);
   });
+
   const no=document.createElement('button');
   no.className='btn';
   no.textContent='NO OBJECTION';
