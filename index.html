@@ -520,6 +520,10 @@ let targetRotX = 0,
     currentRotX = 0,
     currentRotY = 0;
 
+let targetZ = 0;
+let currentZ = 0;
+
+
 // Heavy easing = very slow settling
 const easeFactor = 0.05; // lower = smoother & slower
 
@@ -527,36 +531,42 @@ window.addEventListener('mousemove', (e) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
-  const xNorm = (e.clientX / w) * 2 - 1;
-  const yNorm = (e.clientY / h) * 2 - 1;
+  const x = (e.clientX / w) * 2 - 1; // -1 left, +1 right
+  const y = (e.clientY / h) * 2 - 1; // -1 top, +1 bottom
 
-  targetRotY = xNorm * maxTilt;
-  targetRotX = -yNorm * maxTilt;
+  // rotation
+  targetRotY = x * maxTilt;
+  targetRotX = -y * maxTilt;
+
+  // DEPTH PARALLAX (this is what you want)
+  // mouse corner pushes that corner BACK
+  targetZ = -(Math.abs(x) + Math.abs(y)) * 40;
 });
+
 
 let time = 0;
 
 function animateParallax() {
   time += 0.015;
 
-  // Smooth mouse easing
-  currentRotX += (targetRotX - currentRotX) * 0.06;
-  currentRotY += (targetRotY - currentRotY) * 0.06;
+  // Ease everything
+  currentRotX += (targetRotX - currentRotX) * 0.07;
+  currentRotY += (targetRotY - currentRotY) * 0.07;
+  currentZ += (targetZ - currentZ) * 0.05;
 
-  // CRT magic carpet waves
-  const waveX = Math.sin(time) * 3.5;
-  const waveY = Math.cos(time * 0.7) * 3.5;
+  // CRT wave warp
+  const waveX = Math.sin(time) * 3;
+  const waveY = Math.cos(time * 0.8) * 3;
+  const bendZ = Math.sin(time * 0.6) * 1.2;
 
-  const bendZ = Math.sin(time * 0.5) * 1.2;
-
-  // FINAL combined transform
   screenEl.style.transform = `
-    perspective(1400px)
+    perspective(1600px)
+    translateZ(${currentZ}px)
     rotateX(${currentRotX + waveY}deg)
     rotateY(${currentRotY + waveX}deg)
     rotateZ(${bendZ}deg)
-    scaleX(1.08)
-    scaleY(0.94)
+    scaleX(1.07)
+    scaleY(0.93)
   `;
 
   requestAnimationFrame(animateParallax);
