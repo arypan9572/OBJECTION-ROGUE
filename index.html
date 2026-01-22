@@ -343,7 +343,7 @@ function object(type){
   } else { // wrong objection
     credibility -= 15;
     streak = 0;
-    explanation = getExplanation(current.c, false, current.text); // <-- use current.c here
+    explanation = getExplanation(current.c, false, current.text); // <-- use current.c, not the one they clicked
     logMsg(`WRONG OBJECTION (${type})\nCorrect was: ${current.c}\n${explanation}`, 'bad');
   }
 
@@ -376,14 +376,19 @@ function getExplanation(objectionType, isCorrect, text) {
     'Speculation': 'The witness is guessing about someone’s thoughts or intent, which is not admissible.',
     'Foundation': 'Evidence is being introduced without establishing its authenticity or relevance first.',
     'Argumentative': 'The lawyer is arguing or challenging the witness instead of asking a proper question.',
-    'Compound': 'The question asks multiple things at once, making it confusing or unfair.'
+    'Compound': 'The question asks multiple things at once, making it confusing or unfair.',
+    null: 'No objection is needed because the statement is acceptable and admissible as evidence.'
   };
 
-  const resultText = isCorrect ? 
-    `✅ This objection is correct because: ${reasons[objectionType]}` : 
-    `❌ This objection is incorrect. Reason: ${reasons[objectionType] || 'Not applicable here.'}`;
-
-  return resultText;
+  if (isCorrect) {
+    return objectionType === null 
+      ? '✅ This is correct! No objection needed.' 
+      : `✅ This objection is correct because: ${reasons[objectionType]}`;
+  } else {
+    return objectionType === null 
+      ? '❌ This statement was fine; no objection was needed.' 
+      : `❌ This objection is incorrect. Correct reason: ${reasons[objectionType]}`;
+  }
 }
 
 
