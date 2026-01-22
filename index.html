@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OBJECTION ROGUE</title>
+<title>OBJECTION ROGUE // 8-BIT COURT</title>
 
 <!-- 8-bit font -->
-  
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
@@ -113,11 +112,7 @@ header h1{margin:0 0 10px 0;font-size:18px;color:var(--green)}
 }
 .btn:hover{background:#063b22}
 .btn:active{transform:translate(2px,2px);box-shadow:none}
-.btn, .btn.objection, .sprite, header h1, .panel {
-    background: inherit;
-    color: inherit;
-    border-color: inherit;
-}
+.btn.objection{background:var(--green);color:#000}
 .log{font-size:9px;max-height:240px;overflow:auto}
 .log div{margin-bottom:6px}
 .good{color:var(--green)}
@@ -257,8 +252,6 @@ function object(type){
   }
 
   caseNum++;
-  
-  if(caseNum % 5 === 0) onCaseWin();
 
   if(caseNum%6===0){
     objections++;
@@ -345,101 +338,8 @@ function animateParallax() {
 
 animateParallax();
 
-/*********** UNIVERSAL COLOR CYCLE ***********/
-const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
-let currentColorIndex = 0;
-
-function applyCaseColor(color){
-  // Header h1 and stats
-  document.querySelector('header h1').style.color = color;
-  stats.style.color = color;
-
-  // All panels outlines
-  document.querySelectorAll('header, .panel').forEach(el => el.style.borderColor = color);
-
-  // All buttons — objection buttons background + border, NO OBJECTION text + border
-document.querySelectorAll('.btn').forEach(el => {
-    el.style.background = color;  // palette color
-    el.style.borderColor = color; // palette color
-    el.style.color = color;       // text same color
-});
-
-
- 
-
-  // Sprites — border + text
-  document.querySelectorAll('.sprite').forEach(el => {
-    el.style.borderColor = color;
-    el.style.color = color;
-    el.style.background = '#02140a'; // optional: keep dark box
-  });
-
-  // Labels — skip PHASE:, WITNESS TRAIT:, WITNESS SAYS:
-  document.querySelectorAll('.label').forEach(el => {
-    if(!['PHASE:','WITNESS TRAIT:','WITNESS SAYS:'].includes(el.textContent)){
-      el.style.color = color;
-    }
-  });
-
-  // Courtroom text — everything inside court except the label exclusions
-  Array.from(court.querySelectorAll('*')).forEach(el=>{
-    if(!el.classList.contains('label')){
-      el.style.color = color;
-    }
-  });
-
-  // Log panel — only change boxes, not the text inside GOOD/BAD/INFO
-  document.querySelectorAll('.log div').forEach(el => {
-    if(!el.classList.contains('good') && !el.classList.contains('bad') && !el.classList.contains('info')){
-      el.style.color = color;
-    }
-  });
-}
-
-// Animate color transition
-function animateColorTransition(from, to, duration=800){
-  const start = performance.now();
-  function tick(now){
-    let t = (now-start)/duration;
-    if(t>1) t=1;
-    const color = lerpColor(from, to, t);
-    applyCaseColor(color);
-    if(t<1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-// Helper: linear color interpolation
-function lerpColor(a, b, t){
-  const c1 = a.match(/\d+/g).map(Number);
-  const c2 = b.match(/\d+/g).map(Number);
-  const c = c1.map((v,i)=> Math.round(v + (c2[i]-v)*t));
-  return `rgb(${c[0]},${c[1]},${c[2]})`;
-}
-
-// HEX to RGB
-function hexToRgb(hex){
-  const m = hex.match(/[0-9a-f]{2}/gi);
-  return `rgb(${parseInt(m[0],16)},${parseInt(m[1],16)},${parseInt(m[2],16)})`;
-}
-
-// Trigger color change at end of run
-const originalEndRun = endRun;
-endRun = function(){
-  originalEndRun();
-  setTimeout(()=>{
-    const oldColor = getComputedStyle(document.querySelector('header h1')).color;
-    currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
-    const newColor = hexToRgb(COLOR_PALETTE[currentColorIndex]);
-    animateColorTransition(oldColor, newColor, 800);
-    logMsg('CASE COMPLETE! COLORS UPDATED!', 'info');
-  }, 100);
-};
-
-
 
 // -------- START --------
-
 nextCase();
 </script>
 </body>
