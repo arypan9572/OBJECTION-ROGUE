@@ -231,6 +231,16 @@ const stats = document.getElementById('stats');
 // -------- UTIL --------
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
+function formatText(text) {
+  // If the text contains 'I', 'you', or ends with punctuation like '.', '!', '?' 
+  // treat it like a spoken quote
+  if(/[Iyou]/i.test(text) || /[.!?]$/.test(text)) {
+    return `“${text}”`;
+  }
+  return text;
+}
+
+
 // -------- CORE LOOP --------
 function nextCase(){
   witness = { trait: rand(WITNESS_TRAITS) };
@@ -246,8 +256,9 @@ function nextCase(){
     </div>
     <div class='label'>PHASE:</div> ${phase}<br>
     <div class='label'>WITNESS TRAIT:</div> ${witness.trait}<br><br>
-    <div class='label'>${speaker} SAYS:</div><br>
-    “${current.text}”
+   <div class='label'>${speaker} SAYS:</div><br>
+${formatText(current.text)}
+
   `;
 
   actions.innerHTML='';
