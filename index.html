@@ -119,6 +119,10 @@ header h1{margin:0 0 10px 0;font-size:18px;color:var(--green)}
 .bad{color:var(--red)}
 .info{color:var(--yellow)}
 footer{text-align:center;font-size:8px;opacity:0.7}
+.btn, .btn.objection, .panel, header, .sprite, header h1, .good {
+  transition: all 0.8s ease;
+}
+
 </style>
 </head>
 <body>
@@ -338,6 +342,38 @@ function animateParallax() {
 
 animateParallax();
 
+// -------- DYNAMIC GREEN COLOR --------
+const COLOR_PALETTE = ['#00ff88','#ff66ff','#66ccff','#ffbb33','#ff4444','#ffee55'];
+let currentColorIndex = 0;
+
+function applyDynamicColor(color){
+  // Panels, header, buttons, sprites — borders and backgrounds
+  document.querySelectorAll('.panel, header, .btn, .sprite').forEach(el => {
+    const styles = getComputedStyle(el);
+    // Only change green borders
+    if(styles.borderColor === 'rgb(0, 255, 136)') el.style.borderColor = color;
+    // Only change green backgrounds
+    if(styles.backgroundColor === 'rgb(0, 255, 136)') el.style.backgroundColor = color;
+  });
+
+  // Objection buttons background
+  document.querySelectorAll('.btn.objection').forEach(el => {
+    el.style.backgroundColor = color;
+  });
+
+  // Text: header h1, sprite, .good in log
+  document.querySelectorAll('header h1, .sprite, .good').forEach(el => {
+    if(getComputedStyle(el).color === 'rgb(0, 255, 136)') el.style.color = color;
+  });
+}
+function cycleColor(){
+  currentColorIndex = (currentColorIndex + 1) % COLOR_PALETTE.length;
+  const newColor = COLOR_PALETTE[currentColorIndex];
+  applyDynamicColor(newColor);
+}
+
+// Automatically cycle every 2 seconds
+setInterval(cycleColor, 2000);
 
 // -------- START --------
 nextCase();
