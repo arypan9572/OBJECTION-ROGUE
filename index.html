@@ -113,7 +113,12 @@ header h1{margin:0 0 10px 0;font-size:18px;color:var(--green)}
 }
 .btn:hover{background:#063b22}
 .btn:active{transform:translate(2px,2px);box-shadow:none}
-.btn.objection { background: inherit; color: inherit; }.log{font-size:9px;max-height:240px;overflow:auto}
+.btn, .btn.objection, .sprite, header h1, .panel {
+    background: inherit;
+    color: inherit;
+    border-color: inherit;
+}
+.log{font-size:9px;max-height:240px;overflow:auto}
 .log div{margin-bottom:6px}
 .good{color:var(--green)}
 .bad{color:var(--red)}
@@ -353,17 +358,12 @@ function applyCaseColor(color){
   document.querySelectorAll('header, .panel').forEach(el => el.style.borderColor = color);
 
   // All buttons — objection buttons background + border, NO OBJECTION text + border
- document.querySelectorAll('.btn').forEach(el => {
+document.querySelectorAll('.btn').forEach(el => {
+    el.style.background = color;
     el.style.borderColor = color;
-
-    if(el.classList.contains('objection')){
-        el.style.background = color;  // Objection button background
-        el.style.color = '#000';      // black text
-    } else {
-        el.style.background = '#02140a'; // dark background stays
-        el.style.color = color;          // text follows color cycle
-    }
+    el.style.color = '#000';
 });
+
  
 
   // Sprites — border + text
