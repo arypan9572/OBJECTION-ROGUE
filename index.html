@@ -187,8 +187,8 @@ const EMOTIONS = ["scared", "happy", "confused", "angry"];
 const VERBS = ["signed", "ignored", "took", "destroyed", "altered"];
 
 const PROMPTS = [];
-
-// Generate 500+ witness prompts
+  
+// -------- Generate 500+ witness prompts --------
 for(let i=0; i<500; i++){
   const template = rand(WITNESS_TEMPLATES);
   const text = template
@@ -196,20 +196,23 @@ for(let i=0; i<500; i++){
     .replace("%ADJ%", rand(ADJECTIVES))
     .replace("%EVENT%", rand(EVENTS))
     .replace("%EMOTION%", rand(EMOTIONS));
-  const objection = rand(OBJECTIONS).name;
+
+  const objection = getCorrectObjection("WITNESS", text); // use logic
   PROMPTS.push({type:"WITNESS", text, c:objection});
 }
 
-// Generate 500+ lawyer prompts
+// -------- Generate 500+ lawyer prompts --------
 for(let i=0; i<500; i++){
   const template = rand(LAWYER_TEMPLATES);
   const text = template
     .replace("%ACTION%", rand(ACTIONS))
     .replace("%ADJ%", rand(ADJECTIVES))
     .replace("%VERB%", rand(VERBS));
-  const objection = rand(OBJECTIONS).name;
+
+  const objection = getCorrectObjection("LAWYER", text); // use logic
   PROMPTS.push({type:"LAWYER", text, c:objection});
 }
+
 
 
 // -------- GAME STATE --------
@@ -231,6 +234,21 @@ const stats = document.getElementById('stats');
 // -------- UTIL --------
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
+function getCorrectObjection(type, text) {
+  const lower = text.toLowerCase();
+
+  if(type === "WITNESS") {
+    if(lower.includes("heard") || lower.includes("saw")) return "Hearsay";
+    if(lower.includes("guess") || lower.includes("thinks")) return "Speculation";
+    if(lower.includes("may or may not") || lower.includes("unrelated")) return "Irrelevant";
+    return "Hearsay"; // fallback
+  } else { // LAWYER
+    if(lower.startsWith("did you") || lower.startsWith("isn't it")) return "Leading";
+    if(lower.includes("and")) return "Compound";
+    if(lower.includes("why") || lower.includes("how")) return "Argumentative";
+    return "Foundation"; // fallback
+  }
+}
 
 
 
