@@ -831,17 +831,24 @@ function showCutscene(){
 
 
 function nextCutscene(){
-  cutsceneIndex++;
 
-  if(cutsceneIndex >= currentCutscene.length){
-    cutsceneIndex = 0;
-    gameMode = "GAME";
-    questionIndex = 0;
-    nextCase();   // ❌ DO NOT generateCase again
-  } else {
+  // If NOT last line yet → keep showing cutscene
+  if(cutsceneIndex < currentCutscene.length - 1){
+    cutsceneIndex++;
     showCutscene();
   }
+  // If LAST line ("COURT IS NOW IN SESSION.")
+  else{
+    gameMode = "GAME";
+    questionIndex = 0;
+
+    court.innerHTML = "";   // clear cutscene screen
+    actions.innerHTML = ""; // clear NEXT button
+
+    nextCase(); // enter the courtroom
+  }
 }
+
 
 function showWitnessResponse() {
   cutsceneStage = "WITNESS";
