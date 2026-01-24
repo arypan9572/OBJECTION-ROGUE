@@ -426,13 +426,18 @@ const VERBS = ["signed", "ignored", "took", "destroyed", "altered"];
 // ================================
 
 const CASE_TOPICS = [
-  "a robbery at a store",
-  "a fight in a parking lot",
-  "a car accident",
-  "a theft at night",
-  "a suspicious noise",
-  "an argument at a house"
+  "a robbery at a convenience store at 11:42 PM",
+  "a fight in a parking lot at midnight",
+  "a hit-and-run accident at dusk",
+  "a theft outside an apartment building",
+  "a suspicious noise reported at 2:15 AM",
+  "an argument inside a private residence",
+  "a disturbance near a subway station",
+  "a break-in at a closed restaurant",
+  "a crime reported during a storm",
+  "an incident outside a nightclub"
 ];
+
 
 const QUESTION_TEMPLATES = [
   {
@@ -636,7 +641,7 @@ function showStartScreen(){
 
 function startGame(){
   cutsceneIndex = 0;
-  generateCase();          // ✅ create topic + cutscene FIRST
+  generateCase();   // generate ONCE
   showCutscene();
 }
 
@@ -663,13 +668,13 @@ function nextCutscene(){
   if(cutsceneIndex >= currentCutscene.length){
     cutsceneIndex = 0;
     gameMode = "GAME";
-    generateCase();
     questionIndex = 0;
-    nextCase();
+    nextCase();   // ❌ DO NOT generateCase again
   } else {
     showCutscene();
   }
 }
+
 
 function nextCase() {
 
@@ -683,12 +688,32 @@ function nextCase() {
   current = currentCase[questionIndex];
 
   court.innerHTML = `
-    <div class='courtroom'>
-      <div class='sprite'>JUDGE</div>
-      <div class='sprite'>JURY</div>
-      <div class='sprite'>LAWYER</div>
-      <div class='sprite'>WITNESS</div>
-    </div>
+  <div class="courtroom">
+  <div class="sprite">
+    ⚖ JUDGE<br>
+    Status: Observing<br>
+    Mood: Neutral
+  </div>
+
+  <div class="sprite">
+    👥 JURY<br>
+    Attention: High<br>
+    Bias: Unknown
+  </div>
+
+  <div class="sprite">
+    💼 PROSECUTOR<br>
+    Tactic: Pressing<br>
+    Strategy: Aggressive
+  </div>
+
+  <div class="sprite">
+    🧍 WITNESS<br>
+    Trait: ${witness.trait}<br>
+    Reliability: Questionable
+  </div>
+</div>
+
     <div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
     <div class='label'>LAWYER ASKS:</div><br>
     “${current.question}”<br><br>
@@ -763,10 +788,11 @@ function object(type){
   // ✅ ADVANCE QUESTION
   questionIndex++;
 
-  if(credibility <= 0 || objections <= 0){
-    endRun();
-    return;
-  }
+ if(credibility <= 0){
+  endRun();
+  return;
+}
+
 
   nextCase();
 }
@@ -812,6 +838,8 @@ setTimeout(()=>{
     streak=0;
     log.innerHTML='';
     cutsceneIndex = 0;
+  caseNum++;
+  generateCase();
     showCutscene();
   },3000);
 }
