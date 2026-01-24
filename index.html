@@ -492,79 +492,55 @@ const CASE_TOPICS = [
 ];
 
 
-const QUESTION_TEMPLATES = [
+const QUESTION_LINES = [
 
-/* === NO OBJECTION (NORMAL QUESTIONS) === */
-{q:"What did you personally observe?",a:"I saw the defendant %ACTION%.",type:null},
-{q:"Where were you located when this occurred?",a:"Near the %LOCATION%.",type:null},
-{q:"What occurred immediately after that?",a:"The defendant %ACTION%.",type:null},
-{q:"Did anything unusual catch your attention?",a:"There was shouting.",type:null},
-{q:"Approximately how long did this continue?",a:"A few minutes.",type:null},
-{q:"Did you recognize any of the individuals involved?",a:"Yes, the defendant.",type:null},
-{q:"How did you feel in that moment?",a:"I felt %EMOTION%.",type:null},
-{q:"Can you describe what you saw in your own words?",a:"I saw the defendant %ACTION%.",type:null},
-{q:"What time did this take place?",a:"Late at night.",type:null},
-{q:"What was the environment like?",a:"It was tense.",type:null},
+/* === BASIC WITNESS INTRO === */
+[
+ {q:"Please state your name for the record.", a:"My name is %NAME%.", type:null},
+ {q:"What is your occupation?", a:"I work as a %JOB%.", type:null},
+ {q:"How long have you worked there?", a:"About %TIME%.", type:null},
+ {q:"How would you describe your job performance?", a:"I do my work well.", type:null},
+ {q:"Were you working on the night in question?", a:"Yes.", type:null}
+],
 
-/* === LEADING (SUBTLE) === */
-{q:"You noticed the defendant acting unusual, correct?",a:"Yes.",type:"Leading"},
-{q:"It seemed chaotic to you, didn’t it?",a:"Yes.",type:"Leading"},
-{q:"You would agree the situation was tense?",a:"I suppose so.",type:"Leading"},
-{q:"You saw the defendant leave immediately afterward, correct?",a:"Yes.",type:"Leading"},
-{q:"You felt unsafe there, didn’t you?",a:"No.",type:"Leading"},
-{q:"So the defendant was the only one behaving strangely?",a:"Yes.",type:"Leading"},
-{q:"That behavior appeared suspicious to you, correct?",a:"Yes.",type:"Leading"},
-{q:"You had no doubt it was the defendant?",a:"Yes.",type:"Leading"},
-{q:"The defendant stood out from everyone else, didn’t they?",a:"Yes.",type:"Leading"},
+/* === EVENT BUILD-UP === */
+[
+ {q:"Where were you on the night of the incident?", a:"I was near the %LOCATION%.", type:null},
+ {q:"What were you doing at that time?", a:"I was %ACTION%.", type:null},
+ {q:"Did anything unusual happen?", a:"Yes.", type:null},
+ {q:"What did you see?", a:"I saw the defendant %ACTION%.", type:null},
+ {q:"How did you react?", a:"I felt %EMOTION%.", type:null}
+],
 
-/* === SPECULATION (SUBTLE & HARDER) === */
-{q:"Why do you think the defendant left?",a:"Probably fear.",type:"Speculation"},
-{q:"What do you believe caused this behavior?",a:"Panic.",type:"Speculation"},
-{q:"What were they feeling at that moment?",a:"%EMOTION%.",type:"Speculation"},
-{q:"What do you assume happened before you arrived?",a:"I’m not sure.",type:"Speculation"},
-{q:"What motive do you think the defendant had?",a:"I don’t know.",type:"Speculation"},
-{q:"Why would someone act that way?",a:"Because they were scared.",type:"Speculation"},
-{q:"Do you think the defendant intended to scare anyone?",a:"Possibly.",type:"Speculation"},
-{q:"What do you suppose their goal was?",a:"I guess escape.",type:"Speculation"},
+/* === POLICE CONTACT === */
+[
+ {q:"Did you contact the authorities?", a:"Yes, I did.", type:null},
+ {q:"When did you call the police?", a:"Shortly after.", type:null},
+ {q:"Why did you decide to call?", a:"Because it looked serious.", type:null},
+ {q:"What did you tell them?", a:"What I believed I saw.", type:"Hearsay"},
+ {q:"Was that based on your own observation?", a:"Not entirely.", type:"Foundation"}
+],
 
-/* === HEARSAY === */
-{q:"How did you learn about this?",a:"Someone told me later.",type:"Hearsay"},
-{q:"Is that based on what others said?",a:"Yes.",type:"Hearsay"},
-{q:"Did you witness that yourself?",a:"No.",type:"Hearsay"},
-{q:"Who informed you of that?",a:"A friend.",type:"Hearsay"},
-{q:"What were you told afterward?",a:"That the defendant ran.",type:"Hearsay"},
-{q:"Did someone else describe this to you?",a:"Yes.",type:"Hearsay"},
-{q:"Is your knowledge based on conversations with others?",a:"Yes.",type:"Hearsay"},
+/* === LEADING / SUBTLE === */
+[
+ {q:"It appeared chaotic to you, didn’t it?", a:"Yes.", type:"Leading"},
+ {q:"You felt unsafe, correct?", a:"Yes.", type:"Leading"},
+ {q:"You assumed the defendant was responsible?", a:"I did.", type:"Speculation"},
+ {q:"You did not actually see the entire event, did you?", a:"No.", type:"Foundation"},
+ {q:"So parts of this are your interpretation?", a:"Yes.", type:"Speculation"}
+],
 
-/* === COMPOUND (NOT OBVIOUS) === */
-{q:"Did you see the defendant and hear shouting?",a:"Yes.",type:"Compound"},
-{q:"Were you frightened and confused at the same time?",a:"Yes.",type:"Compound"},
-{q:"Did you notice the defendant and the victim arguing?",a:"Yes.",type:"Compound"},
-{q:"Did you run and call for help?",a:"Yes.",type:"Compound"},
-{q:"Did you observe the defendant and then contact the police?",a:"Yes.",type:"Compound"},
-{q:"Were you watching the scene while trying to escape?",a:"Yes.",type:"Compound"},
-{q:"Did the noise start and the defendant leave?",a:"Yes.",type:"Compound"},
-{q:"Did you hear a sound and see someone running?",a:"Yes.",type:"Compound"},
-
-/* === FOUNDATION === */
-{q:"Where did that information come from?",a:"I don’t remember.",type:"Foundation"},
-{q:"Who gave you that detail?",a:"Someone else.",type:"Foundation"},
-{q:"How do you know this?",a:"I was told.",type:"Foundation"},
-{q:"What source supports that claim?",a:"I’m not sure.",type:"Foundation"},
-{q:"What evidence do you have for that?",a:"I don’t know.",type:"Foundation"},
-{q:"Can you verify that information?",a:"No.",type:"Foundation"},
-{q:"How was that established?",a:"I don’t recall.",type:"Foundation"},
-
-/* === ARGUMENTATIVE === */
-{q:"Do you expect the court to believe that?",a:"Yes.",type:"Argumentative"},
-{q:"Is that really reliable?",a:"I think so.",type:"Argumentative"},
-{q:"Are you certain you’re not mistaken?",a:"I’m sure.",type:"Argumentative"},
-{q:"So we’re just supposed to trust you?",a:"Yes.",type:"Argumentative"},
-{q:"Does that story even make sense to you?",a:"I guess.",type:"Argumentative"},
-{q:"Isn’t that a convenient explanation?",a:"Maybe.",type:"Argumentative"},
-{q:"You want us to accept that without proof?",a:"Yes.",type:"Argumentative"}
+/* === CONTRADICTION LINE === */
+[
+ {q:"Earlier you said you were far away, correct?", a:"Yes.", type:null},
+ {q:"Yet you identified the defendant clearly?", a:"Yes.", type:"Argumentative"},
+ {q:"Isn’t that a convenient explanation?", a:"I don’t think so.", type:"Argumentative"},
+ {q:"So you are completely certain despite the distance?", a:"I believe so.", type:"Speculation"},
+ {q:"You can’t be 100% sure, can you?", a:"No.", type:"Leading"}
+]
 
 ];
+
 
 
 
@@ -660,39 +636,46 @@ function generateCase() {
   const topic = rand(CASE_TOPICS);
   currentCutscene = generateCutscene(topic);
 
-  for(let i=0;i<20;i++){
-    const t = rand(QUESTION_TEMPLATES);
+  // ✅ Pick ONE logical question line (sequence)
+  const selectedLine = rand(QUESTION_LINES);
+
+  selectedLine.forEach(t => {
 
     const action = rand(ACTIONS);
-    const event = topic;
     const emotion = rand(EMOTIONS);
     const adj = rand(ADJECTIVES);
 
     const q = t.q
       .replace("%ACTION%", action)
-      .replace("%EVENT%", event)
       .replace("%EMOTION%", emotion)
-      .replace("%ADJ%", adj);
+      .replace("%ADJ%", adj)
+      .replace("%LOCATION%", rand(["street","parking lot","store","alley","apartment"]))
+      .replace("%JOB%", rand(["clerk","guard","teacher","bartender","driver"]))
+      .replace("%NAME%", rand(["Alex","Jordan","Casey","Morgan","Riley"]))
+      .replace("%TIME%", rand(["2 years","5 years","a few months","several years"]));
 
-const filler = rand(FILLERS);
-const mood = rand(WITNESS_MOODS);
+    const mood = rand(WITNESS_MOODS);
+    const filler = rand(FILLERS[mood] || [""]);
 
+    const a = filler + t.a
+      .replace("%ACTION%", action)
+      .replace("%EMOTION%", emotion)
+      .replace("%ADJ%", adj)
+      .replace("%LOCATION%", rand(["street","parking lot","store","alley","apartment"]))
+      .replace("%JOB%", rand(["clerk","guard","teacher","bartender","driver"]))
+      .replace("%NAME%", rand(["Alex","Jordan","Casey","Morgan","Riley"]))
+      .replace("%TIME%", rand(["2 years","5 years","a few months","several years"]));
 
-const a = filler + t.a
-  .replace("%ACTION%", action)
-  .replace("%EVENT%", event)
-  .replace("%EMOTION%", emotion)
-  .replace("%ADJ%", adj);
+    currentCase.push({
+      question: q,
+      answer: a,
+      objection: t.type,
+      mood: mood
+    });
 
-currentCase.push({
-  question: q,
-  answer: a,
-  objection: t.type,
-  mood: mood
-});
-
-  }
+  });
 }
+
 
 
 
