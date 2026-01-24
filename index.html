@@ -1044,6 +1044,81 @@ function animateParallax() {
   requestAnimationFrame(animateParallax);
 }
 
+/********************
+   ENHANCEMENTS
+********************/
+
+// ---------- 1. Keyboard Shortcuts for Objections ----------
+window.addEventListener('keydown', (e) => {
+  if(gameMode !== "GAME") return;
+
+  const key = e.key;
+  if(key >= '1' && key <= '7'){
+    const index = parseInt(key)-1;
+    if(OBJECTIONS[index]) object(OBJECTIONS[index].name);
+  } else if(key === '0'){
+    object(null); // No Objection
+  }
+});
+
+// ---------- 2. Smooth Scrolling Log ----------
+function logMsg(m,c){
+  const d=document.createElement('div');
+  d.className=c;
+  d.textContent='> '+m;
+
+  log.prepend(d);
+  // Animate scroll to top smoothly
+  log.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---------- 3. Wave Text Fix for Spaces ----------
+function showCutscene(){
+  gameMode = "CUTSCENE";
+
+  court.innerHTML = `
+    <div class="label">CASE FILE</div><br><br>
+    <div id="cutsceneText"></div>
+    <br><br>
+    <button class="btn" onclick="nextCutscene()">NEXT</button>
+  `;
+
+  actions.innerHTML = "";
+
+  const textBox = document.getElementById("cutsceneText");
+  const text = currentCutscene[cutsceneIndex];
+
+  const effect = rand(['blink1','blink2','blink3','wave','none']);
+
+  if(effect === 'wave'){
+    textBox.innerHTML = '';
+    text.split('').forEach(char=>{
+      const span = document.createElement('span');
+      // Preserve spaces visually
+      span.textContent = char === ' ' ? '\u00A0' : char;
+      textBox.appendChild(span);
+    });
+    textBox.classList.add('wave');
+  } else if(effect.startsWith('blink')){
+    textBox.classList.add(effect);
+    typeText(textBox, text, 22);
+  } else {
+    typeText(textBox, text, 22);
+  }
+}
+
+// ---------- 4. Responsive CRT Curvature ----------
+function adjustCRTCurve(){
+  const screenWrap = document.getElementById('screen-wrap');
+  if(window.innerWidth < 600){
+    // reduce curvature for small screens
+    screenEl.style.transform = 'scale(0.95)';
+  } else {
+    screenEl.style.transform = 'scale(1)';
+  }
+}
+window.addEventListener('resize', adjustCRTCurve);
+adjustCRTCurve();
 
 
 // -------- START --------
