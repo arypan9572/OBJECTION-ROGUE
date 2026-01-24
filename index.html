@@ -899,9 +899,9 @@ questionIndex++; // move to next question next time
   earlyObjection = false;
 
   const lawyerLabel = rand([
-    "DEFENSE COUNSEL ASKS:",
+    "OPPOSING COUNSEL ASKS:",
     "LAWYER PRESSES:",
-    "DEFENSE COUNSEL STATES:",
+    "PROSECUTOR STATES:",
     "ATTORNEY ARGUES:"
   ]);
 
@@ -918,11 +918,20 @@ questionIndex++; // move to next question next time
 
     <br><div class='info'>[Press SPACE to continue]</div>
   `;
+// Descriptive courtroom lines
+court.innerHTML += `
+  <div class='label'>COURTROOM DESCRIPTION:</div>
+  <div id='courtDesc' class='info'>
+    The witness appears ${current.mood.toLowerCase()}.<br>
+    The judge watches silently. The jury takes notes.<br>
+    You sense tension in the room. Every word matters.
+  </div>
+`;
 
   actions.innerHTML = "";
   createButtons(true);
 
-typeSansText(current.question, document.getElementById("defenseText"));
+typeSansText(formatText(current.question), document.getElementById("defenseText"));
 }
 
 
@@ -955,11 +964,14 @@ if(type === current.objection){
     streak++;
     credibility += 5 * multiplier;
     logMsg(`CORRECT (${multiplier}x bonus!)`, 'good');
+    logMsg(getExplanation(type, true), 'info'); // <-- ADD explanation
 } else {
     credibility -= 10;
     streak = 0;
     logMsg(`WRONG. Correct was: ${current.objection}`, 'bad');
+    logMsg(getExplanation(current.objection, false), 'info'); // <-- ADD explanation
 }
+
 
 
   nextCase();
