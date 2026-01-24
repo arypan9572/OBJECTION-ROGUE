@@ -449,14 +449,14 @@ const EVENTS = ["a fight", "a theft", "an argument", "a car crash", "a mysteriou
 const EMOTIONS = ["scared", "happy", "confused", "angry"];
 const WITNESS_MOODS = ["nervous","angry","sarcastic","calm","confused"];
 
-const FILLERS = [
-  "Uh… ",
-  "I mean… ",
-  "Well… ",
-  "I'm not sure but… ",
-  "That's hard to say… ",
-  ""
-];
+const FILLERS = {
+  nervous: ["Uh… probably ", "I mean… I think ", "Well… maybe ", "Um… yes, "],
+  angry: ["Yes! ", "No! ", "Obviously ", "Of course "],
+  sarcastic: ["Yeah… sure. ", "Right… totally ", "Obviously… "],
+  calm: ["Yes. ", "No. ", "I believe ", "It seems "],
+  confused: ["I… I think ", "Maybe ", "I guess ", "Possibly "]
+};
+
 
 const LAWYER_LABELS = [
   "LAWYER ASKS:",
@@ -853,29 +853,35 @@ function nextCutscene(){
 function showWitnessResponse() {
   cutsceneStage = "WITNESS";
 
-  const witnessLabel = rand([
-    "WITNESS HESITATES:",
-    "WITNESS RESPONDS:",
-    "NERVOUS WITNESS:",
-    "ANGRY WITNESS:",
-    "SARCASTIC WITNESS:"
-  ]);
+  const mood = current.mood.toLowerCase();
+
+  // mood-consistent labels
+  const labelMap = {
+    nervous: "NERVOUS WITNESS:",
+    angry: "ANGRY WITNESS:",
+    sarcastic: "SARCASTIC WITNESS:",
+    calm: "WITNESS RESPONDS:",
+    confused: "CONFUSED WITNESS:"
+  };
+
+  const witnessLabel = labelMap[mood] || "WITNESS RESPONDS:";
+
+  // hesitant but clear yes/no
+  const yesNo = Math.random() < 0.5 ? "yes." : "no.";
+  const filler = rand(FILLERS[mood] || [""]);
+
+  const answer = filler + yesNo;
 
   court.innerHTML += `
     <br><div class='label'>${witnessLabel}</div>
     <div id="witnessText"></div>
   `;
 
-  typeSansText(rand([
-    "Uh… I think so.",
-    "I'm not sure.",
-    "That's hard to say.",
-    "Maybe.",
-    "I guess so."
-  ]), document.getElementById("witnessText"));
+  typeSansText(`“${answer}”`, document.getElementById("witnessText"));
 
   createButtons(false);
 }
+
 
   
 function typeSansText(text, el) {
