@@ -892,7 +892,8 @@ function typeSansText(text, el) {
 
 function nextCase() {
   witness = { trait: rand(WITNESS_TRAITS) };
-  current = rand(PROMPTS);
+current = currentCase[questionIndex];
+questionIndex++; // move to next question next time
 
   cutsceneStage = "DEFENSE";
   earlyObjection = false;
@@ -921,7 +922,7 @@ function nextCase() {
   actions.innerHTML = "";
   createButtons(true);
 
-  typeSansText(current.text, document.getElementById("defenseText"));
+typeSansText(current.question, document.getElementById("defenseText"));
 }
 
 
@@ -950,15 +951,16 @@ function object(type){
 
   if(type) objections--;
 
-  if(type === current.c){
+if(type === current.objection){
     streak++;
     credibility += 5 * multiplier;
     logMsg(`CORRECT (${multiplier}x bonus!)`, 'good');
-  } else {
+} else {
     credibility -= 10;
     streak = 0;
-    logMsg(`WRONG. Correct was: ${current.c}`, 'bad');
-  }
+    logMsg(`WRONG. Correct was: ${current.objection}`, 'bad');
+}
+
 
   nextCase();
 }
