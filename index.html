@@ -923,9 +923,16 @@ function typeSansText(text, el) {
 
 
 function nextCase() {
+
+  // ✅ STOP AFTER 20 QUESTIONS
+  if(questionIndex >= currentCase.length){
+    endRun();
+    return;
+  }
+
   witness = { trait: rand(WITNESS_TRAITS) };
-current = currentCase[questionIndex];
-questionIndex++; // move to next question next time
+  current = currentCase[questionIndex];
+  questionIndex++;
 
   cutsceneStage = "DEFENSE";
   earlyObjection = false;
@@ -946,25 +953,28 @@ questionIndex++; // move to next question next time
     </div>
 
     <div class='label'>${lawyerLabel}</div>
+    <div class='info'>QUESTION ${questionIndex} / ${currentCase.length}</div>
     <div id="defenseText" class="sans"></div>
 
     <br><div class='info'>[Press SPACE to continue]</div>
   `;
-// Descriptive courtroom lines
-court.innerHTML += `
-  <div class='label'>COURTROOM DESCRIPTION:</div>
-  <div id='courtDesc' class='info'>
-    The witness appears ${current.mood.toLowerCase()}.<br>
-    The judge watches silently. The jury takes notes.<br>
-    You sense tension in the room. Every word matters.
-  </div>
-`;
+
+  court.innerHTML += `
+    <div class='label'>COURTROOM DESCRIPTION:</div>
+    <div id='courtDesc' class='info'>
+      The witness appears ${current.mood.toLowerCase()}.<br>
+      The judge watches silently. The jury takes notes.<br>
+      You sense tension in the room. Every word matters.
+    </div>
+  `;
 
   actions.innerHTML = "";
   createButtons(true);
 
-typeSansText(formatText(current.question), document.getElementById("defenseText"));
+  typeSansText(formatText(current.question), document.getElementById("defenseText"));
+  updateStats(); // ✅ updates RUN / CASE / STREAK display
 }
+
 
 
 function createButtons(isEarly) {
@@ -1207,10 +1217,11 @@ window.addEventListener('resize', adjustCRTCurve);
 adjustCRTCurve();
 
 window.addEventListener("keydown", e => {
-  if (e.code === "Space" && cutsceneStage === "DEFENSE") {
+  if (e.code === "Space" && gameMode === "GAME" && cutsceneStage === "DEFENSE") {
     showWitnessResponse();
   }
 });
+
 
 // -------- START --------
 showStartScreen();
