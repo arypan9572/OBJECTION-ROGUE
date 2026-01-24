@@ -474,6 +474,26 @@ const QUESTION_TEMPLATES = [
 
 let currentCase = [];
 let questionIndex = 0;
+  
+const CUTSCENES = [
+  [
+    "In the criminal court of Neon City...",
+    "A strange crime has shaken the public.",
+    "One witness claims to know the truth.",
+    "But their story is full of contradictions...",
+    "Justice depends on your objections."
+  ],
+  [
+    "Another trial begins.",
+    "The courtroom grows tense.",
+    "Only precise objections can reveal the truth."
+  ],
+  [
+    "A new case file opens.",
+    "Lies, fear, and confusion fill the stand.",
+    "The law demands clarity."
+  ]
+];
 
 function generateCase() {
   currentCase = [];
@@ -516,6 +536,10 @@ let credibility = 100;
 let streak = 0;
 let witness = {};
 let current = {};
+
+let gameMode = "START"; // START, CUTSCENE, GAME
+let cutsceneIndex = 0;
+
 
 // -------- DOM --------
 const court = document.getElementById('court');
@@ -572,7 +596,66 @@ function getSpeakerLabel(type, text) {
   }
 }
 
+function showStartScreen(){
+  gameMode = "START";
+
+  court.innerHTML = `
+    <div style="text-align:center">
+      <h1 style="color:var(--green)">OBJECTION ROGUE</h1>
+      <p>8-BIT CRT COURTROOM SIMULATION</p>
+      <br>
+      <p>PRESS START</p>
+      <br><br>
+      <button class="btn objection" onclick="startGame()">START</button>
+    </div>
+  `;
+
+  actions.innerHTML = "";
+  log.innerHTML = "";
+  stats.innerHTML = "";
+}
+
+function startGame(){
+  cutsceneIndex = 0;
+  showCutscene();
+}
+
+function showCutscene(){
+  gameMode = "CUTSCENE";
+
+  const scene = CUTSCENES[(run-1) % CUTSCENES.length];
+  const text = scene[cutsceneIndex];
+
+  court.innerHTML = `
+    <div class="label">CASE FILE</div><br><br>
+    ${text}
+    <br><br>
+    <button class="btn" onclick="nextCutscene()">NEXT</button>
+  `;
+
+  actions.innerHTML = "";
+}
+
+function nextCutscene(){
+  const scene = CUTSCENES[(run-1) % CUTSCENES.length];
+
+  cutsceneIndex++;
+
+  if(cutsceneIndex >= scene.length){
+    cutsceneIndex = 0;
+    gameMode = "GAME";
+    generateCase();
+    questionIndex = 0;
+    nextCase();
+  } else {
+    showCutscene();
+  }
+}
+
 function nextCase() {
+
+    if(gameMode !== "GAME") return;
+
   if(questionIndex >= currentCase.length){
     endRun();
     return;
@@ -712,7 +795,7 @@ function endRun(){
   actions.innerHTML='';
   logMsg('RUN OVER — RESETTING', 'bad');
 
-  setTimeout(()=>{
+setTimeout(()=>{
     run++;
     caseNum=1;
     phase='CROSS';
@@ -720,7 +803,8 @@ function endRun(){
     credibility=100;
     streak=0;
     log.innerHTML='';
-    nextCase();
+    cutsceneIndex = 0;
+    showCutscene();
   },3000);
 }
 
@@ -800,8 +884,7 @@ function animateParallax() {
 
 
 // -------- START --------
-generateCase();
-nextCase();
+showStartScreen();
 animateParallax();
 
 </script>
