@@ -682,6 +682,9 @@ let streak = 0;
 let witness = {};
 let current = {};
 
+let cutsceneStage = "DEFENSE"; // DEFENSE or WITNESS
+let earlyObjection = false;
+
 let gameMode = "START"; // START, CUTSCENE, GAME
 let cutsceneIndex = 0;
 
@@ -840,58 +843,84 @@ function nextCutscene(){
   }
 }
 
+function showWitnessResponse() {
+  cutsceneStage = "WITNESS";
 
-function nextCase() {
+  const witnessLabel = rand([
+    "WITNESS HESITATES:",
+    "WITNESS RESPONDS:",
+    "NERVOUS WITNESS:",
+    "ANGRY WITNESS:",
+    "SARCASTIC WITNESS:"
+  ]);
 
-  if(gameMode !== "GAME") return;
-
-  if(questionIndex >= currentCase.length){
-    endRun();
-    return;
-  }
-
-  current = currentCase[questionIndex];
-
-  const lawyerLabel = rand(LAWYER_LABELS);
-  const witnessLabel = rand(WITNESS_LABELS);
-
-  court.innerHTML = `
-  <div class="courtroom">
-    <div class="sprite">
-      ⚖ JUDGE<br>
-      Status: Observing<br>
-      Mood: Neutral
-    </div>
-
-    <div class="sprite">
-      👥 JURY<br>
-      Attention: High<br>
-      Bias: Unknown
-    </div>
-
-    <div class="sprite">
-      💼 PROSECUTOR<br>
-      Tactic: Pressing<br>
-      Strategy: Aggressive
-    </div>
-
-    <div class="sprite">
-      🧍 WITNESS<br>
-      Trait: ${current.mood}<br>
-      Reliability: Questionable
-    </div>
-  </div>
-
-  <div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
-
-  <div class='label'>${lawyerLabel}</div><br>
-  “${current.question}”<br><br>
-
-  <div class='label'>${witnessLabel}</div><br>
-  “${current.answer}”
+  court.innerHTML += `
+    <br><div class='label'>${witnessLabel}</div>
+    <div id="witnessText"></div>
   `;
 
-  actions.innerHTML='';
+  typeSansText(rand([
+    "Uh… I think so.",
+    "I'm not sure.",
+    "That's hard to say.",
+    "Maybe.",
+    "I guess so."
+  ]), document.getElementById("witnessText"));
+
+  createButtons(false);
+}
+
+  
+function typeSansText(text, el) {
+  el.innerHTML = "";
+  let i = 0;
+
+  const interval = setInterval(() => {
+    el.innerHTML += text[i];
+    i++;
+    if (i >= text.length) clearInterval(interval);
+  }, 35);
+}
+
+
+function nextCase() {
+  witness = { trait: rand(WITNESS_TRAITS) };
+  current = rand(PROMPTS);
+
+  cutsceneStage = "DEFENSE";
+  earlyObjection = false;
+
+  const lawyerLabel = rand([
+    "DEFENSE COUNSEL ASKS:",
+    "LAWYER PRESSES:",
+    "DEFENSE COUNSEL STATES:",
+    "ATTORNEY ARGUES:"
+  ]);
+
+  court.innerHTML = `
+    <div class='courtroom'>
+      <div class='sprite'>JUDGE</div>
+      <div class='sprite'>JURY</div>
+      <div class='sprite'>DEFENSE</div>
+      <div class='sprite'>WITNESS</div>
+    </div>
+
+    <div class='label'>${lawyerLabel}</div>
+    <div id="defenseText" class="sans"></div>
+
+    <br><div class='info'>[Press SPACE to continue]</div>
+  `;
+
+  actions.innerHTML = "";
+  createButtons(true);
+
+  typeSansText(current.text, document.getElementById("defenseText"));
+}
+
+
+function createButtons(isEarly) {
+  actions.innerHTML = "";
+  earlyObjection = isEarly;
 
   OBJECTIONS.forEach(o=>{
     const b=document.createElement('button');
@@ -906,67 +935,27 @@ function nextCase() {
   no.textContent='NO OBJECTION';
   no.onclick=()=>object(null);
   actions.appendChild(no);
-
-  updateStats();
 }
-
 
 
 function object(type){
-  const judge = document.getElementById('judge');
-  judge.className = 'judge';
+  let multiplier = earlyObjection ? 2 : 1;
 
   if(type) objections--;
 
-  let explanation = '';
-  const correct = current.objection;
-
-  if(type === correct){
+  if(type === current.c){
     streak++;
-    credibility += 5;
-    explanation = getExplanation(correct, true);
-    logMsg(`CORRECT OBJECTION: ${type}\n${explanation}`, 'good');
-
-    judge.classList.add('good');
-    setTimeout(() => judge.classList.add('idle'), 400);
-
-  } else if(type === null){
-    if(correct === null){
-      streak++;
-      credibility += 5;
-      logMsg(`CORRECT: No Objection needed! ✅`, 'good');
-
-      judge.classList.add('good');
-      setTimeout(() => judge.classList.add('idle'), 400);
-
-    } else {
-      credibility -= 10;
-      streak = 0;
-      explanation = getExplanation(correct, false);
-      logMsg(`MISSED OBJECTION.\nCorrect was: ${correct}\n${explanation}`, 'bad');
-    }
-
+    credibility += 5 * multiplier;
+    logMsg(`CORRECT (${multiplier}x bonus!)`, 'good');
   } else {
-    credibility -= 15;
+    credibility -= 10;
     streak = 0;
-    explanation = getExplanation(correct, false);
-    logMsg(`WRONG OBJECTION (${type})\nCorrect was: ${correct}\n${explanation}`, 'bad');
-
-    judge.classList.add('bad');
-    setTimeout(() => judge.classList.add('idle'), 400);
+    logMsg(`WRONG. Correct was: ${current.c}`, 'bad');
   }
-
-  // ✅ ADVANCE QUESTION
-  questionIndex++;
-
- if(credibility <= 0){
-  endRun();
-  return;
-}
-
 
   nextCase();
 }
+
 
 
 
@@ -1164,6 +1153,11 @@ function adjustCRTCurve(){
 window.addEventListener('resize', adjustCRTCurve);
 adjustCRTCurve();
 
+window.addEventListener("keydown", e => {
+  if (e.code === "Space" && cutsceneStage === "DEFENSE") {
+    showWitnessResponse();
+  }
+});
 
 // -------- START --------
 showStartScreen();
