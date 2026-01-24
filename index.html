@@ -283,6 +283,23 @@ footer{text-align:center;font-size:8px;opacity:0.7}
   animation: judgeAngry 0.4s steps(2);
 }
 
+/* blinking cursor variations */
+.blink1::after { content: "▮"; animation: blink1 1s infinite; }
+.blink2::after { content: "_"; animation: blink2 0.8s infinite; }
+.blink3::after { content: "|"; animation: blink3 0.6s infinite; }
+
+@keyframes blink1 { 0%,50% { opacity:1 } 51%,100% { opacity:0 } }
+@keyframes blink2 { 0%,40% { opacity:1 } 41%,100% { opacity:0 } }
+@keyframes blink3 { 0%,60% { opacity:1 } 61%,100% { opacity:0 } }
+
+/* wave text effect */
+.wave span { display:inline-block; animation: wave 1.5s ease-in-out infinite; }
+@keyframes wave {
+  0%,100% { transform: translateY(0); }
+  25% { transform: translateY(-3px); }
+  50% { transform: translateY(3px); }
+  75% { transform: translateY(-2px); }
+}
 
 
 </style>
@@ -500,26 +517,80 @@ let questionIndex = 0;
 let currentCutscene = [];
 
 function generateCutscene(topic){
-  return [
+  // variations for each line (except last)
+  const intros = [
     `CASE FILE: ${topic.toUpperCase()}`,
+    `FILE OPENED: ${topic.toUpperCase()}`,
+    `RECORDS SHOW: ${topic.toUpperCase()}`,
+    `INVESTIGATION NOTES: ${topic.toUpperCase()}`
+  ];
 
-    `Authorities were alerted to ${topic}.`,
+  const alerts = [
+    `Authorities received a report about ${topic}.`,
+    `Dispatch logs show a call regarding ${topic}.`,
+    `Someone nearby reported suspicious activity: ${topic}.`,
+    `A witness mentioned unusual events involving ${topic}.`
+  ];
 
-    `One civilian witness claims to have seen the defendant near the scene shortly before the incident.`,
+  const witnessLines = [
+    `One civilian claims to have noticed the defendant around the scene.`,
+    `A bystander reports seeing someone near the area at the time.`,
+    `A witness states they observed movement near the incident.`,
+    `Someone says they were close by and saw the defendant.`
+  ];
 
-    `However, inconsistencies in their testimony suggest the truth may be distorted by fear, bias, or assumption.`,
+  const inconsistencies = [
+    `However, the account is inconsistent and may be biased.`,
+    `Yet, some details contradict known facts, raising doubts.`,
+    `Inconsistencies suggest the witness may be mistaken.`,
+    `Certain claims do not align with evidence and must be checked.`
+  ];
 
-    `The prosecution will attempt to establish guilt through questioning.`,
+  const prosecutionLines = [
+    `The prosecution aims to prove guilt through questioning.`,
+    `Legal representatives will attempt to establish responsibility.`,
+    `Prosecutors will examine each statement carefully.`,
+    `Expect the prosecution to press for confirmations.`
+  ];
 
-    `Your duty as defense counsel is to expose flawed reasoning and unlawful testimony.`,
+  const defenseLines = [
+    `Your duty is to uncover flaws and contradictions.`,
+    `As defense counsel, spot errors and expose assumptions.`,
+    `It’s up to you to challenge unreliable testimony.`,
+    `Be vigilant: not every statement is as it seems.`
+  ];
 
-    `Listen carefully. Not every mistake will be obvious.`,
+  const listenLines = [
+    `Listen closely. Mistakes can be subtle.`,
+    `Pay attention — some errors are hidden.`,
+    `Observe carefully; assumptions may mislead.`,
+    `Every detail counts, so stay alert.`
+  ];
 
-    `Only precise objections will uncover the truth.`,
+  const objectionLines = [
+    `Only precise objections reveal the truth.`,
+    `A well-timed objection can change the outcome.`,
+    `Objections are your tool to defend justice.`,
+    `Strategic objections will uncover hidden lies.`
+  ];
 
-    `COURT IS NOW IN SESSION.`
+  // last line is always fixed
+  const finalLine = `COURT IS NOW IN SESSION.`;
+
+  // pick random one from each array
+  return [
+    rand(intros),
+    rand(alerts),
+    rand(witnessLines),
+    rand(inconsistencies),
+    rand(prosecutionLines),
+    rand(defenseLines),
+    rand(listenLines),
+    rand(objectionLines),
+    finalLine
   ];
 }
+
 
 
 
@@ -683,7 +754,6 @@ function startGame(){
 function showCutscene(){
   gameMode = "CUTSCENE";
 
-  // add a container for typewriter text
   court.innerHTML = `
     <div class="label">CASE FILE</div><br><br>
     <div id="cutsceneText"></div>
@@ -693,12 +763,29 @@ function showCutscene(){
 
   actions.innerHTML = "";
 
-  // grab the container and type the line
   const textBox = document.getElementById("cutsceneText");
   const text = currentCutscene[cutsceneIndex];
 
-  typeText(textBox, text, 22); // 22ms per char; adjust speed here
+  // randomly pick effect
+  const effect = rand(['blink1','blink2','blink3','wave','none']);
+
+  if(effect === 'wave'){
+    // wrap each letter in a span for wave
+    textBox.innerHTML = '';
+    text.split('').forEach(char=>{
+      const span = document.createElement('span');
+      span.textContent = char;
+      textBox.appendChild(span);
+    });
+    textBox.classList.add('wave');
+  } else if(effect.startsWith('blink')){
+    textBox.classList.add(effect);
+    typeText(textBox, text, 22);
+  } else {
+    typeText(textBox, text, 22);
+  }
 }
+
 
 
 
