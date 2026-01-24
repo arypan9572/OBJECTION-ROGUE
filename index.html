@@ -421,32 +421,89 @@ const EVENTS = ["a fight", "a theft", "an argument", "a car crash", "a mysteriou
 const EMOTIONS = ["scared", "happy", "confused", "angry"];
 const VERBS = ["signed", "ignored", "took", "destroyed", "altered"];
 
-const PROMPTS = [];
-  
-// -------- Generate 500+ witness prompts --------
-for(let i=0; i<500; i++){
-  const template = rand(WITNESS_TEMPLATES);
-  const text = template
-    .replace("%ACTION%", rand(ACTIONS))
-    .replace("%ADJ%", rand(ADJECTIVES))
-    .replace("%EVENT%", rand(EVENTS))
-    .replace("%EMOTION%", rand(EMOTIONS));
+// ================================
+// CASE GENERATOR (20 QUESTIONS)
+// ================================
 
-  const objection = getCorrectObjection("WITNESS", text); // use logic
-  PROMPTS.push({type:"WITNESS", text, c:objection});
+const CASE_TOPICS = [
+  "a robbery at a store",
+  "a fight in a parking lot",
+  "a car accident",
+  "a theft at night",
+  "a suspicious noise",
+  "an argument at a house"
+];
+
+const QUESTION_TEMPLATES = [
+  {
+    q: "Did you see the defendant %ACTION%?",
+    a: "Yes, I saw them %ACTION%.",
+    type: "Leading"
+  },
+  {
+    q: "What did you observe when %EVENT% happened?",
+    a: "I noticed the defendant was %EMOTION%.",
+    type: "Speculation"
+  },
+  {
+    q: "Isn't it true you were %ADJ% at the time?",
+    a: "Yes, I was %ADJ%.",
+    type: "Leading"
+  },
+  {
+    q: "Can you explain how %EVENT% occurred?",
+    a: "I think it happened because they were %EMOTION%.",
+    type: "Speculation"
+  },
+  {
+    q: "You heard someone say the defendant %ACTION%, correct?",
+    a: "Yes, someone told me that.",
+    type: "Hearsay"
+  },
+  {
+    q: "Describe what you personally saw.",
+    a: "I saw the defendant %ACTION%.",
+    type: null
+  },
+  {
+    q: "Where were you when %EVENT% happened?",
+    a: "I was nearby and saw everything clearly.",
+    type: null
+  }
+];
+
+let currentCase = [];
+let questionIndex = 0;
+
+function generateCase() {
+  currentCase = [];
+  questionIndex = 0;
+
+  const topic = rand(CASE_TOPICS);
+
+  for(let i=0;i<20;i++){
+    const t = rand(QUESTION_TEMPLATES);
+
+    const q = t.q
+      .replace("%ACTION%", rand(ACTIONS))
+      .replace("%EVENT%", rand(EVENTS))
+      .replace("%EMOTION%", rand(EMOTIONS))
+      .replace("%ADJ%", rand(ADJECTIVES));
+
+    const a = t.a
+      .replace("%ACTION%", rand(ACTIONS))
+      .replace("%EVENT%", rand(EVENTS))
+      .replace("%EMOTION%", rand(EMOTIONS))
+      .replace("%ADJ%", rand(ADJECTIVES));
+
+    currentCase.push({
+      question: q,
+      answer: a,
+      objection: t.type
+    });
+  }
 }
 
-// -------- Generate 500+ lawyer prompts --------
-for(let i=0; i<500; i++){
-  const template = rand(LAWYER_TEMPLATES);
-  const text = template
-    .replace("%ACTION%", rand(ACTIONS))
-    .replace("%ADJ%", rand(ADJECTIVES))
-    .replace("%VERB%", rand(VERBS));
-
-  const objection = getCorrectObjection("LAWYER", text); // use logic
-  PROMPTS.push({type:"LAWYER", text, c:objection});
-}
 
 
 
@@ -516,26 +573,29 @@ function getSpeakerLabel(type, text) {
 }
 
 function nextCase() {
-  witness = { trait: rand(WITNESS_TRAITS) };
-  current = rand(PROMPTS);
-  const speaker = current.type==='WITNESS' ? 'WITNESS' : 'OPPOSING COUNSEL';
-  const speakerLabel = getSpeakerLabel(current.type, current.text); // compute BEFORE template
-  const formattedText = formatText(current.text); // compute BEFORE template
+  if(questionIndex >= currentCase.length){
+    endRun();
+    return;
+  }
+
+  current = currentCase[questionIndex];
 
   court.innerHTML = `
     <div class='courtroom'>
       <div class='sprite'>JUDGE</div>
       <div class='sprite'>JURY</div>
-      <div class='sprite'>${speaker}</div>
-      <div class='sprite'>YOU</div>
+      <div class='sprite'>LAWYER</div>
+      <div class='sprite'>WITNESS</div>
     </div>
-    <div class='label'>PHASE:</div> ${phase}<br>
-    <div class='label'>WITNESS TRAIT:</div> ${witness.trait}<br><br>
-    <div class='label'>${speakerLabel}:</div><br>
-    ${formattedText}
+    <div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
+    <div class='label'>LAWYER ASKS:</div><br>
+    “${current.question}”<br><br>
+    <div class='label'>WITNESS ANSWERS:</div><br>
+    “${current.answer}”
   `;
 
   actions.innerHTML='';
+
   OBJECTIONS.forEach(o=>{
     const b=document.createElement('button');
     b.className='btn objection';
@@ -553,6 +613,7 @@ function nextCase() {
   updateStats();
 }
 
+
 function object(type){
   const judge = document.getElementById('judge');
 judge.className = 'judge';
@@ -561,7 +622,7 @@ judge.className = 'judge';
 
   let explanation = '';
 
-  if(type === current.c){ // player picked the correct objection
+if(type === current.objection){
     streak++;
     credibility += 5;
     explanation = getExplanation(current.c, true, current.text);
@@ -739,8 +800,10 @@ function animateParallax() {
 
 
 // -------- START --------
+generateCase();
 nextCase();
 animateParallax();
+
 </script>
 </body>
 </html>
