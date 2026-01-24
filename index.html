@@ -436,41 +436,47 @@ const CASE_TOPICS = [
 
 const QUESTION_TEMPLATES = [
   {
-    q: "Did you see the defendant %ACTION%?",
-    a: "Yes, I saw them %ACTION%.",
+    q: "Would you agree that the defendant appeared %ADJ% when you noticed them?",
+    a: "Yes, that seems accurate.",
     type: "Leading"
   },
   {
-    q: "What did you observe when %EVENT% happened?",
-    a: "I noticed the defendant was %EMOTION%.",
+    q: "What conclusion did you draw from what you observed?",
+    a: "I assumed they were %EMOTION%.",
     type: "Speculation"
   },
   {
-    q: "Isn't it true you were %ADJ% at the time?",
-    a: "Yes, I was %ADJ%.",
-    type: "Leading"
-  },
-  {
-    q: "Can you explain how %EVENT% occurred?",
-    a: "I think it happened because they were %EMOTION%.",
-    type: "Speculation"
-  },
-  {
-    q: "You heard someone say the defendant %ACTION%, correct?",
-    a: "Yes, someone told me that.",
+    q: "You were informed that the defendant was %ACTION%, correct?",
+    a: "Yes, that is what I was told.",
     type: "Hearsay"
   },
   {
-    q: "Describe what you personally saw.",
-    a: "I saw the defendant %ACTION%.",
+    q: "Can you describe the sequence of events?",
+    a: "It happened because they felt %EMOTION%.",
+    type: "Speculation"
+  },
+  {
+    q: "Isn't it true that your memory of the incident is unclear?",
+    a: "Yes, parts of it are unclear.",
+    type: "Leading"
+  },
+  {
+    q: "What did you personally witness?",
+    a: "I observed the defendant near the scene.",
     type: null
   },
   {
-    q: "Where were you when %EVENT% happened?",
-    a: "I was nearby and saw everything clearly.",
+    q: "Where were you positioned at the time of the incident?",
+    a: "I was standing across the street.",
     type: null
+  },
+  {
+    q: "You discussed this with another person before testifying today?",
+    a: "Yes, we talked about it afterward.",
+    type: "Hearsay"
   }
 ];
+
 
 let currentCase = [];
 let questionIndex = 0;
@@ -479,13 +485,26 @@ let currentCutscene = [];
 
 function generateCutscene(topic){
   return [
-    `Case File: ${topic.toUpperCase()}`,
-    `A witness claims to know what happened during ${topic}.`,
-    `However, their story contains contradictions.`,
-    `Only correct objections can reveal the truth.`,
-    `Court is now in session.`
+    `CASE FILE: ${topic.toUpperCase()}`,
+
+    `At approximately 11:42 PM, authorities were alerted to ${topic}.`,
+
+    `One civilian witness claims to have seen the defendant near the scene shortly before the incident.`,
+
+    `However, inconsistencies in their testimony suggest the truth may be distorted by fear, bias, or assumption.`,
+
+    `The prosecution will attempt to establish guilt through questioning.`,
+
+    `Your duty as defense counsel is to expose flawed reasoning and unlawful testimony.`,
+
+    `Listen carefully. Not every mistake will be obvious.`,
+
+    `Only precise objections will uncover the truth.`,
+
+    `COURT IS NOW IN SESSION.`
   ];
 }
+
 
 
 function generateCase() {
@@ -493,24 +512,27 @@ function generateCase() {
   questionIndex = 0;
 
   const topic = rand(CASE_TOPICS);
-
   currentCutscene = generateCutscene(topic);
-
 
   for(let i=0;i<20;i++){
     const t = rand(QUESTION_TEMPLATES);
 
+    const action = rand(ACTIONS);
+    const event = topic;
+    const emotion = rand(EMOTIONS);
+    const adj = rand(ADJECTIVES);
+
     const q = t.q
-      .replace("%ACTION%", rand(ACTIONS))
-      .replace("%EVENT%", rand(EVENTS))
-      .replace("%EMOTION%", rand(EMOTIONS))
-      .replace("%ADJ%", rand(ADJECTIVES));
+      .replace("%ACTION%", action)
+      .replace("%EVENT%", event)
+      .replace("%EMOTION%", emotion)
+      .replace("%ADJ%", adj);
 
     const a = t.a
-      .replace("%ACTION%", rand(ACTIONS))
-      .replace("%EVENT%", rand(EVENTS))
-      .replace("%EMOTION%", rand(EMOTIONS))
-      .replace("%ADJ%", rand(ADJECTIVES));
+      .replace("%ACTION%", action)
+      .replace("%EVENT%", event)
+      .replace("%EMOTION%", emotion)
+      .replace("%ADJ%", adj);
 
     currentCase.push({
       question: q,
@@ -519,6 +541,7 @@ function generateCase() {
     });
   }
 }
+
 
 
 
@@ -613,8 +636,10 @@ function showStartScreen(){
 
 function startGame(){
   cutsceneIndex = 0;
+  generateCase();          // ✅ create topic + cutscene FIRST
   showCutscene();
 }
+
 
 function showCutscene(){
   gameMode = "CUTSCENE";
