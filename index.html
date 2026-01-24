@@ -475,31 +475,27 @@ const QUESTION_TEMPLATES = [
 let currentCase = [];
 let questionIndex = 0;
   
-const CUTSCENES = [
-  [
-    "In the criminal court of Neon City...",
-    "A strange crime has shaken the public.",
-    "One witness claims to know the truth.",
-    "But their story is full of contradictions...",
-    "Justice depends on your objections."
-  ],
-  [
-    "Another trial begins.",
-    "The courtroom grows tense.",
-    "Only precise objections can reveal the truth."
-  ],
-  [
-    "A new case file opens.",
-    "Lies, fear, and confusion fill the stand.",
-    "The law demands clarity."
-  ]
-];
+let currentCutscene = [];
+
+function generateCutscene(topic){
+  return [
+    `Case File: ${topic.toUpperCase()}`,
+    `A witness claims to know what happened during ${topic}.`,
+    `However, their story contains contradictions.`,
+    `Only correct objections can reveal the truth.`,
+    `Court is now in session.`
+  ];
+}
+
 
 function generateCase() {
   currentCase = [];
   questionIndex = 0;
 
   const topic = rand(CASE_TOPICS);
+
+  currentCutscene = generateCutscene(topic);
+
 
   for(let i=0;i<20;i++){
     const t = rand(QUESTION_TEMPLATES);
@@ -623,8 +619,7 @@ function startGame(){
 function showCutscene(){
   gameMode = "CUTSCENE";
 
-  const scene = CUTSCENES[(run-1) % CUTSCENES.length];
-  const text = scene[cutsceneIndex];
+  const text = currentCutscene[cutsceneIndex];
 
   court.innerHTML = `
     <div class="label">CASE FILE</div><br><br>
@@ -636,12 +631,11 @@ function showCutscene(){
   actions.innerHTML = "";
 }
 
-function nextCutscene(){
-  const scene = CUTSCENES[(run-1) % CUTSCENES.length];
 
+function nextCutscene(){
   cutsceneIndex++;
 
-  if(cutsceneIndex >= scene.length){
+  if(cutsceneIndex >= currentCutscene.length){
     cutsceneIndex = 0;
     gameMode = "GAME";
     generateCase();
@@ -699,91 +693,80 @@ function nextCase() {
 
 function object(type){
   const judge = document.getElementById('judge');
-judge.className = 'judge';
+  judge.className = 'judge';
 
   if(type) objections--;
 
   let explanation = '';
+  const correct = current.objection;
 
-if(type === current.objection){
+  if(type === correct){
     streak++;
     credibility += 5;
-    explanation = getExplanation(current.c, true, current.text);
+    explanation = getExplanation(correct, true);
     logMsg(`CORRECT OBJECTION: ${type}\n${explanation}`, 'good');
 
-      judge.classList.add('good');
-  setTimeout(() => judge.classList.add('idle'), 400);
+    judge.classList.add('good');
+    setTimeout(() => judge.classList.add('idle'), 400);
 
-  } else if(type === null){ // player clicked No Objection
-    if(current.c === null){ // actually no objection needed
+  } else if(type === null){
+    if(correct === null){
       streak++;
       credibility += 5;
       logMsg(`CORRECT: No Objection needed! ✅`, 'good');
 
-          judge.classList.add('good');
-    setTimeout(() => judge.classList.add('idle'), 400);
+      judge.classList.add('good');
+      setTimeout(() => judge.classList.add('idle'), 400);
 
-    } else { // they missed a real objection
+    } else {
       credibility -= 10;
       streak = 0;
-      explanation = getExplanation(current.c, false, current.text); // <-- use current.c here
-      logMsg(`MISSED OBJECTION. SHOULD HAVE BEEN ${current.c}\n${explanation}`, 'bad');
+      explanation = getExplanation(correct, false);
+      logMsg(`MISSED OBJECTION.\nCorrect was: ${correct}\n${explanation}`, 'bad');
     }
 
-  } else { // wrong objection
+  } else {
     credibility -= 15;
     streak = 0;
-    explanation = getExplanation(current.c, false, current.text); // <-- use current.c, not the one they clicked
-    logMsg(`WRONG OBJECTION (${type})\nCorrect was: ${current.c}\n${explanation}`, 'bad');
+    explanation = getExplanation(correct, false);
+    logMsg(`WRONG OBJECTION (${type})\nCorrect was: ${correct}\n${explanation}`, 'bad');
 
-      judge.classList.add('bad');
-  setTimeout(() => judge.classList.add('idle'), 400);
-
+    judge.classList.add('bad');
+    setTimeout(() => judge.classList.add('idle'), 400);
   }
+
+  // ✅ ADVANCE QUESTION
+  questionIndex++;
 
   if(credibility <= 0 || objections <= 0){
     endRun();
     return;
   }
 
-  caseNum++;
-
-  if(caseNum % 6 === 0){
-    objections++;
-    logMsg('BONUS: +1 OBJECTION', 'info');
-  }
-
-  if(caseNum % 10 === 0){
-    phase = phase==='CROSS' ? 'REDIRECT' : 'CROSS';
-    logMsg(`PHASE SHIFT: ${phase}`, 'info');
-  }
-
   nextCase();
 }
 
 
-function getExplanation(objectionType, isCorrect, text) {
+
+function getExplanation(objectionType, isCorrect) {
   const reasons = {
-    'Hearsay': 'The witness is reporting something they heard from someone else, which is not allowed as evidence unless an exception applies.',
-    'Leading': 'The question suggests the answer instead of letting the witness answer freely.',
-    'Irrelevant': 'The testimony does not relate to the case at hand.',
-    'Speculation': 'The witness is guessing about someone’s thoughts or intent, which is not admissible.',
-    'Foundation': 'Evidence is being introduced without establishing its authenticity or relevance first.',
-    'Argumentative': 'The lawyer is arguing or challenging the witness instead of asking a proper question.',
-    'Compound': 'The question asks multiple things at once, making it confusing or unfair.',
-    null: 'No objection is needed because the statement is acceptable and admissible as evidence.'
+    'Hearsay': 'The witness is repeating something they heard from someone else instead of personal knowledge.',
+    'Leading': 'The lawyer suggests the answer instead of letting the witness respond freely.',
+    'Irrelevant': 'The testimony does not relate to the facts of the case.',
+    'Speculation': 'The witness is guessing about thoughts or intentions.',
+    'Foundation': 'Evidence was mentioned without proving where it came from.',
+    'Argumentative': 'The lawyer is arguing instead of asking a neutral question.',
+    'Compound': 'The question asks more than one thing at once.',
+    null: 'No objection is needed because the statement is legally acceptable.'
   };
 
-  if (isCorrect) {
-    return objectionType === null 
-      ? '✅ This is correct! No objection needed.' 
-      : `✅ This objection is correct because: ${reasons[objectionType]}`;
+  if(isCorrect){
+    return `✅ Reason: ${reasons[objectionType]}`;
   } else {
-    return objectionType === null 
-      ? '❌ This statement was fine; no objection was needed.' 
-      : `❌ This objection is incorrect. Correct reason: ${reasons[objectionType]}`;
+    return `❌ Reason: ${reasons[objectionType]}`;
   }
 }
+
 
 
 function endRun(){
