@@ -651,8 +651,6 @@ function generateCase() {
 const filler = rand(FILLERS);
 const mood = rand(WITNESS_MOODS);
 
-const filler = rand(FILLERS);
-const mood = rand(WITNESS_MOODS);
 
 const a = filler + t.a
   .replace("%ACTION%", action)
@@ -845,7 +843,7 @@ function nextCutscene(){
 
 function nextCase() {
 
-    if(gameMode !== "GAME") return;
+  if(gameMode !== "GAME") return;
 
   if(questionIndex >= currentCase.length){
     endRun();
@@ -854,74 +852,44 @@ function nextCase() {
 
   current = currentCase[questionIndex];
 
+  const lawyerLabel = rand(LAWYER_LABELS);
+  const witnessLabel = rand(WITNESS_LABELS);
+
   court.innerHTML = `
   <div class="courtroom">
-  <div class="sprite">
-    ⚖ JUDGE<br>
-    Status: Observing<br>
-    Mood: Neutral
+    <div class="sprite">
+      ⚖ JUDGE<br>
+      Status: Observing<br>
+      Mood: Neutral
+    </div>
+
+    <div class="sprite">
+      👥 JURY<br>
+      Attention: High<br>
+      Bias: Unknown
+    </div>
+
+    <div class="sprite">
+      💼 PROSECUTOR<br>
+      Tactic: Pressing<br>
+      Strategy: Aggressive
+    </div>
+
+    <div class="sprite">
+      🧍 WITNESS<br>
+      Trait: ${current.mood}<br>
+      Reliability: Questionable
+    </div>
   </div>
 
-  <div class="sprite">
-    👥 JURY<br>
-    Attention: High<br>
-    Bias: Unknown
-  </div>
+  <div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
 
-  <div class="sprite">
-    💼 PROSECUTOR<br>
-    Tactic: Pressing<br>
-    Strategy: Aggressive
-  </div>
+  <div class='label'>${lawyerLabel}</div><br>
+  “${current.question}”<br><br>
 
-  <div class="sprite">
-    🧍 WITNESS<br>
-    Trait: ${witness.trait}<br>
-    Reliability: Questionable
-  </div>
-</div>
-
-    <div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
-   const lawyerLabel = rand(LAWYER_LABELS);
-const witnessLabel = rand(WITNESS_LABELS);
-
-court.innerHTML = `
-<div class="courtroom">
-  <div class="sprite">
-    ⚖ JUDGE<br>
-    Status: Observing<br>
-    Mood: Neutral
-  </div>
-
-  <div class="sprite">
-    👥 JURY<br>
-    Attention: High<br>
-    Bias: Unknown
-  </div>
-
-  <div class="sprite">
-    💼 PROSECUTOR<br>
-    Tactic: Pressing<br>
-    Strategy: Aggressive
-  </div>
-
-  <div class="sprite">
-    🧍 WITNESS<br>
-    Trait: ${witness.trait}<br>
-    Reliability: Questionable
-  </div>
-</div>
-
-<div class='label'>QUESTION ${questionIndex+1} / 20</div><br><br>
-
-<div class='label'>${lawyerLabel}</div><br>
-“${current.question}”<br><br>
-
-<div class='label'>${witnessLabel}</div><br>
-“${current.answer}”
-`;
-
-  
+  <div class='label'>${witnessLabel}</div><br>
+  “${current.answer}”
+  `;
 
   actions.innerHTML='';
 
@@ -941,6 +909,7 @@ court.innerHTML = `
 
   updateStats();
 }
+
 
 
 function object(type){
