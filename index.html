@@ -496,47 +496,73 @@ const QUESTION_TEMPLATES = [
 
 /* === NO OBJECTION (NORMAL QUESTIONS) === */
 {q:"What did you personally observe?",a:"I saw the defendant %ACTION%.",type:null},
-{q:"Where were you standing at the time?",a:"Near the %LOCATION%.",type:null},
-{q:"What happened next?",a:"The defendant %ACTION%.",type:null},
-{q:"Did anything stand out to you?",a:"There was shouting.",type:null},
-{q:"How long did this last?",a:"A few minutes.",type:null},
-{q:"Did you recognize anyone?",a:"Yes, the defendant.",type:null},
-{q:"What was your reaction?",a:"I felt %EMOTION%.",type:null},
+{q:"Where were you located when this occurred?",a:"Near the %LOCATION%.",type:null},
+{q:"What occurred immediately after that?",a:"The defendant %ACTION%.",type:null},
+{q:"Did anything unusual catch your attention?",a:"There was shouting.",type:null},
+{q:"Approximately how long did this continue?",a:"A few minutes.",type:null},
+{q:"Did you recognize any of the individuals involved?",a:"Yes, the defendant.",type:null},
+{q:"How did you feel in that moment?",a:"I felt %EMOTION%.",type:null},
+{q:"Can you describe what you saw in your own words?",a:"I saw the defendant %ACTION%.",type:null},
+{q:"What time did this take place?",a:"Late at night.",type:null},
+{q:"What was the environment like?",a:"It was tense.",type:null},
 
 /* === LEADING (SUBTLE) === */
 {q:"You noticed the defendant acting unusual, correct?",a:"Yes.",type:"Leading"},
-{q:"It appeared chaotic to you?",a:"Yes.",type:"Leading"},
+{q:"It seemed chaotic to you, didn’t it?",a:"Yes.",type:"Leading"},
 {q:"You would agree the situation was tense?",a:"I suppose so.",type:"Leading"},
-{q:"You saw the defendant leave right after, didn’t you?",a:"Yes.",type:"Leading"},
-{q:"You didn’t feel safe there, correct?",a:"No.",type:"Leading"},
+{q:"You saw the defendant leave immediately afterward, correct?",a:"Yes.",type:"Leading"},
+{q:"You felt unsafe there, didn’t you?",a:"No.",type:"Leading"},
+{q:"So the defendant was the only one behaving strangely?",a:"Yes.",type:"Leading"},
+{q:"That behavior appeared suspicious to you, correct?",a:"Yes.",type:"Leading"},
+{q:"You had no doubt it was the defendant?",a:"Yes.",type:"Leading"},
+{q:"The defendant stood out from everyone else, didn’t they?",a:"Yes.",type:"Leading"},
 
-/* === SPECULATION (SUBTLE) === */
+/* === SPECULATION (SUBTLE & HARDER) === */
 {q:"Why do you think the defendant left?",a:"Probably fear.",type:"Speculation"},
 {q:"What do you believe caused this behavior?",a:"Panic.",type:"Speculation"},
 {q:"What were they feeling at that moment?",a:"%EMOTION%.",type:"Speculation"},
-{q:"What do you assume happened before that?",a:"I’m not sure.",type:"Speculation"},
+{q:"What do you assume happened before you arrived?",a:"I’m not sure.",type:"Speculation"},
+{q:"What motive do you think the defendant had?",a:"I don’t know.",type:"Speculation"},
+{q:"Why would someone act that way?",a:"Because they were scared.",type:"Speculation"},
+{q:"Do you think the defendant intended to scare anyone?",a:"Possibly.",type:"Speculation"},
+{q:"What do you suppose their goal was?",a:"I guess escape.",type:"Speculation"},
 
 /* === HEARSAY === */
 {q:"How did you learn about this?",a:"Someone told me later.",type:"Hearsay"},
 {q:"Is that based on what others said?",a:"Yes.",type:"Hearsay"},
 {q:"Did you witness that yourself?",a:"No.",type:"Hearsay"},
 {q:"Who informed you of that?",a:"A friend.",type:"Hearsay"},
+{q:"What were you told afterward?",a:"That the defendant ran.",type:"Hearsay"},
+{q:"Did someone else describe this to you?",a:"Yes.",type:"Hearsay"},
+{q:"Is your knowledge based on conversations with others?",a:"Yes.",type:"Hearsay"},
 
 /* === COMPOUND (NOT OBVIOUS) === */
 {q:"Did you see the defendant and hear shouting?",a:"Yes.",type:"Compound"},
 {q:"Were you frightened and confused at the same time?",a:"Yes.",type:"Compound"},
 {q:"Did you notice the defendant and the victim arguing?",a:"Yes.",type:"Compound"},
 {q:"Did you run and call for help?",a:"Yes.",type:"Compound"},
+{q:"Did you observe the defendant and then contact the police?",a:"Yes.",type:"Compound"},
+{q:"Were you watching the scene while trying to escape?",a:"Yes.",type:"Compound"},
+{q:"Did the noise start and the defendant leave?",a:"Yes.",type:"Compound"},
+{q:"Did you hear a sound and see someone running?",a:"Yes.",type:"Compound"},
 
 /* === FOUNDATION === */
 {q:"Where did that information come from?",a:"I don’t remember.",type:"Foundation"},
 {q:"Who gave you that detail?",a:"Someone else.",type:"Foundation"},
 {q:"How do you know this?",a:"I was told.",type:"Foundation"},
+{q:"What source supports that claim?",a:"I’m not sure.",type:"Foundation"},
+{q:"What evidence do you have for that?",a:"I don’t know.",type:"Foundation"},
+{q:"Can you verify that information?",a:"No.",type:"Foundation"},
+{q:"How was that established?",a:"I don’t recall.",type:"Foundation"},
 
 /* === ARGUMENTATIVE === */
 {q:"Do you expect the court to believe that?",a:"Yes.",type:"Argumentative"},
 {q:"Is that really reliable?",a:"I think so.",type:"Argumentative"},
-{q:"Are you certain you’re not mistaken?",a:"I’m sure.",type:"Argumentative"}
+{q:"Are you certain you’re not mistaken?",a:"I’m sure.",type:"Argumentative"},
+{q:"So we’re just supposed to trust you?",a:"Yes.",type:"Argumentative"},
+{q:"Does that story even make sense to you?",a:"I guess.",type:"Argumentative"},
+{q:"Isn’t that a convenient explanation?",a:"Maybe.",type:"Argumentative"},
+{q:"You want us to accept that without proof?",a:"Yes.",type:"Argumentative"}
 
 ];
 
