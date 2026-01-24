@@ -33,6 +33,17 @@ body{
   justify-content:center;
   align-items:center;
 }
+
+#cutsceneText::after {
+  content: "▮";
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,50% { opacity:1; }
+  51%,100% { opacity:0; }
+}
+
 /* CRT curvature + blur */
 #screen{
   width:100%;
@@ -492,7 +503,7 @@ function generateCutscene(topic){
   return [
     `CASE FILE: ${topic.toUpperCase()}`,
 
-    `At approximately 11:42 PM, authorities were alerted to ${topic}.`,
+    `Authorities were alerted to ${topic}.`,
 
     `One civilian witness claims to have seen the defendant near the scene shortly before the incident.`,
 
@@ -509,6 +520,7 @@ function generateCutscene(topic){
     `COURT IS NOW IN SESSION.`
   ];
 }
+
 
 
 
@@ -620,6 +632,28 @@ function getSpeakerLabel(type, text) {
   }
 }
 
+// =============================
+// SANS-TYPE TEXT ANIMATION
+// =============================
+let typingInterval;
+
+function typeText(element, text, speed = 25, callback = null){
+  let i = 0;
+  element.textContent = "";
+  clearInterval(typingInterval);
+
+  typingInterval = setInterval(() => {
+    if(i < text.length){
+      element.textContent += text[i];
+      i++;
+    } else {
+      clearInterval(typingInterval);
+      if(callback) callback(); // optional callback when done
+    }
+  }, speed);
+}
+
+
 function showStartScreen(){
   gameMode = "START";
 
@@ -649,17 +683,23 @@ function startGame(){
 function showCutscene(){
   gameMode = "CUTSCENE";
 
-  const text = currentCutscene[cutsceneIndex];
-
+  // add a container for typewriter text
   court.innerHTML = `
     <div class="label">CASE FILE</div><br><br>
-    ${text}
+    <div id="cutsceneText"></div>
     <br><br>
     <button class="btn" onclick="nextCutscene()">NEXT</button>
   `;
 
   actions.innerHTML = "";
+
+  // grab the container and type the line
+  const textBox = document.getElementById("cutsceneText");
+  const text = currentCutscene[cutsceneIndex];
+
+  typeText(textBox, text, 22); // 22ms per char; adjust speed here
 }
+
 
 
 function nextCutscene(){
